@@ -1,2 +1,2 @@
 # stats-calculator
-A statistics calculator to use in PSYC 210 at KU. 
+A statistics calculator to use for an introductory statistics course.

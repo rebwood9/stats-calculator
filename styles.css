@@ -1,0 +1,678 @@
+/* ============================================================
+   styles.css
+   ============================================================
+   PSYC 210 Statistical Calculators
+   University of Kansas
+
+   Design philosophy: clean, institutional, academic.
+   Color palette derives from KU Blue (#0051ba) with supporting
+   navy, blue-gray, and crimson (error only) tones.
+   ============================================================ */
+
+
+/* ============================================================
+   COLOR PALETTE
+
+   Semantic naming: variables describe ROLE, not appearance.
+   This means if you decide to change the primary color later,
+   you edit one line and everything follows. If instead we
+   named things by color (--blue, --red), we'd have to hunt
+   through the file for every usage.
+   ============================================================ */
+:root {
+  /* Brand */
+  --ku-blue: #0051ba;          /* primary brand color */
+  --ku-blue-hover: #003d8f;    /* darker for hover states */
+  --ku-crimson: #E8000D;       /* reserved for errors ONLY */
+
+  /* Text hierarchy */
+  --text-primary: #003459;     /* body text — deep navy, softer than black */
+  --text-secondary: #5a6b85;   /* secondary labels, panel descriptions */
+  --text-muted: #8e9fbc;       /* hints, placeholders, metadata */
+
+  /* Surfaces */
+  --bg-page: #ffffff;          /* main page background */
+  --bg-panel: #f8fafc;         /* subtle tint for result grids */
+  --bg-callout: #f0f5fc;       /* light KU Blue tint for interpretations */
+  --bg-input: #ffffff;         /* input fields */
+
+  /* Structure */
+  --rule: #dde5ed;             /* dividers, input borders, horizontal lines */
+  --rule-strong: #c4d1e0;      /* slightly darker for emphasis */
+
+  /* Interaction */
+  --focus-ring: rgba(0, 81, 186, 0.15); /* KU Blue at 15% for focus glow */
+  
+
+  /* Typography scale
+     Defining sizes as variables lets you tune the whole tool
+     with one change rather than hunting for every font-size. */
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+}
+
+
+/* ============================================================
+   GLOBAL RESET
+
+   Zero out browser defaults. box-sizing: border-box makes widths
+   include padding and borders, which is the modern convention.
+   ============================================================ */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+/* ============================================================
+   BODY
+
+   Max-width caps the reading width. Overly wide lines of text
+   are hard to read; 900px works well for a tool with a mix of
+   text and grid content.
+   ============================================================ */
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  /* ^ Smoother font rendering on Mac. */
+
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 56px 40px 80px;
+}
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+header {
+  border-bottom: 3px solid var(--ku-blue);
+  /* ^ The bold KU Blue rule under the header is a small but
+     effective way to signal institutional identity without
+     needing a logo. */
+  padding-bottom: 24px;
+  margin-bottom: 36px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ku-blue);
+  /* ^ Uses KU Blue for the eyebrow — draws the eye to the
+     institutional identifier first. */
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+h1 {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+h1 em {
+  font-style: normal;
+  color: var(--ku-blue);
+  /* ^ The italicized word in the h1 gets colored KU Blue instead
+     of actually being italicized. Emphasizes the word visually
+     while keeping the heading upright and institutional. */
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  margin-top: 10px;
+  max-width: 640px;
+  font-size: 16px;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  background-color: var(--bg-panel);
+  padding: 1px 6px;
+  border-radius: 3px;
+  color: var(--text-primary);
+}
+
+
+/* ============================================================
+   TAB NAVIGATION
+
+   Horizontal row of tab buttons. The active one has a KU Blue
+   underline; inactive ones are muted. Uses flexbox with
+   flex-wrap so tabs wrap onto a second line on narrow screens.
+   ============================================================ */
+nav.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 36px;
+}
+
+.tab {
+  background: none;
+  border: none;
+  padding: 14px 4px;
+  margin-right: 28px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  /* ^ Pulling the bottom edge down by 1px lets the active tab's
+     border sit exactly on top of the nav's bottom border,
+     creating the "active tab attached to content below" effect. */
+  transition: color 0.15s, border-color 0.15s;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tab:hover {
+  color: var(--text-primary);
+}
+
+.tab.active {
+  color: var(--ku-blue);
+  border-bottom-color: var(--ku-blue);
+  font-weight: 600;
+}
+
+/* ============================================================
+   PANELS
+
+   All panels exist in the HTML but only .active is visible.
+   JavaScript will toggle the .active class when tabs are clicked.
+   ============================================================ */
+.panel {
+  display: none;
+}
+
+.panel.active {
+  display: block;
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* ^ Subtle fade-in when switching tabs. Not necessary but adds
+   a small polish that makes the interface feel responsive. */
+
+.panel-header {
+  margin-bottom: 28px;
+}
+
+h2 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+
+.panel-desc {
+  color: var(--text-secondary);
+  font-size: 15px;
+  max-width: 640px;
+  line-height: 1.5;
+}
+
+
+/* ============================================================
+   MODE TOGGLE (Raw data / Summary stats)
+
+   Segmented control. Active mode is KU Blue background with
+   white text; inactive is muted.
+   ============================================================ */
+.mode-toggle {
+  display: inline-flex;
+  background-color: var(--bg-panel);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 3px;
+  margin-bottom: 24px;
+}
+
+.mode-toggle button {
+  background: transparent;
+  border: none;
+  padding: 8px 16px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.15s, color 0.15s;
+  font-weight: 500;
+}
+
+.mode-toggle button:hover:not(.active) {
+  color: var(--text-primary);
+  /* ^ :not(.active) means "only apply this if not already active."
+     Otherwise the hover would fight with the active state. */
+}
+
+.mode-toggle button.active {
+  background-color: var(--ku-blue);
+  color: white;
+}
+
+
+/* ============================================================
+   FORM FIELDS
+   ============================================================ */
+.field {
+  margin-bottom: 18px;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.field-row-4 {
+  /* Four-column grid for ANOVA summary rows (name, mean, SD, n).
+     Name column gets extra width, n column gets less, since
+     n values are always short. */
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 0.7fr;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  letter-spacing: 0.01em;
+}
+
+label .hint {
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-left: 6px;
+  font-size: 12px;
+  font-style: italic;
+  /* ^ Hints look distinct from labels: lighter weight, muted
+     color, italic. Students can tell what's a "field name" vs
+     "helpful note." */
+}
+
+textarea,
+input[type="number"],
+input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  background-color: var(--bg-input);
+  font-family: var(--font-mono);
+  /* ^ Monospace inputs mean numbers align vertically when
+     students see their own data. Improves readability. */
+  font-size: 14px;
+  color: var(--text-primary);
+  border-radius: 4px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
+  /* ^ Students can drag to make the textarea taller when
+     they paste long lists, but not wider (which would
+     break the layout). */
+  line-height: 1.5;
+}
+
+textarea:focus,
+input:focus {
+  outline: none;
+  border-color: var(--ku-blue);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+  /* ^ Removing the default outline and replacing it with a
+     KU Blue border + soft glow. This is important for
+     accessibility — never remove focus indication without
+     replacing it. */
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+  /* ^ Some browsers apply reduced opacity to placeholders by
+     default, making them too faint. Setting to 1 gives us
+     control via the color. */
+}
+
+
+/* ============================================================
+   CALCULATE BUTTON
+
+   Primary action. KU Blue background, white text. Darkens
+   slightly on hover.
+   ============================================================ */
+.calc-btn {
+  background-color: var(--ku-blue);
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.15s, transform 0.05s;
+  letter-spacing: 0.01em;
+}
+
+.calc-btn:hover {
+  background-color: var(--ku-blue-hover);
+}
+
+.calc-btn:active {
+  transform: translateY(1px);
+  /* ^ Slight downward nudge on click makes the button feel
+     "pressed." A small touch that improves perceived
+     responsiveness. */
+}
+
+
+/* ============================================================
+   GROUP ADD/REMOVE BUTTONS (ANOVA)
+
+   Secondary style — outlined rather than filled. This visually
+   subordinates them to the calculate button so students know
+   which is the "main" action.
+   ============================================================ */
+.group-controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+  margin-bottom: 20px;
+}
+
+.group-btn {
+  background: white;
+  color: var(--ku-blue);
+  border: 1px solid var(--ku-blue);
+  padding: 8px 16px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.group-btn:hover {
+  background-color: var(--ku-blue);
+  color: white;
+}
+
+.group-row {
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px dashed var(--rule);
+  /* ^ Dashed line between group rows in ANOVA gives visual
+     separation without feeling too heavy. */
+}
+
+.group-row:last-child {
+  border-bottom: none;
+}
+
+
+/* ============================================================
+   ERROR MESSAGE
+
+   Crimson is reserved for errors so students immediately
+   understand something went wrong. This is the ONLY place
+   red appears in the interface.
+   ============================================================ */
+.error {
+  color: var(--ku-crimson);
+  font-size: 14px;
+  margin-top: 12px;
+  min-height: 20px;
+  /* ^ min-height prevents the layout from jumping when an
+     error appears or disappears. */
+}
+
+.error:empty {
+  display: none;
+  /* ^ Hide the entire element when it has no text, so it
+     doesn't take up space. */
+}
+
+
+/* ============================================================
+   RESULTS
+
+   Grid of stat "cells" showing values. Uses tabular numerals
+   so digits align across rows.
+   ============================================================ */
+.results {
+  margin-top: 32px;
+}
+
+.results:empty {
+  display: none;
+}
+
+.results h3 {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ku-blue);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--ku-blue);
+  /* ^ The Results heading gets a KU Blue rule under it,
+     echoing the header rule and reinforcing the visual
+     hierarchy. */
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  /* ^ Auto-fit means the browser fits as many 160px+ cells
+     per row as it can. On a wide screen, you might get 5
+     per row; on a narrow screen, 2. Responsive by default. */
+  border: 1px solid var(--rule);
+  background-color: var(--bg-input);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.result-cell {
+  padding: 14px 16px;
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  background-color: var(--bg-input);
+}
+
+.result-cell:last-child {
+  border-right: none;
+}
+
+.result-label {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.result-value {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  /* ^ tabular-nums forces every digit (0–9) to take equal
+     width. Critical for stats displays where columns of
+     numbers should align. */
+}
+
+.result-value.significant {
+  color: #f2a900;
+  font-weight: 600;
+  /* ^ Significant results are KU Blue and bolder. */
+}
+
+
+/* ============================================================
+   INTERPRETATION CALLOUT
+
+   Plain-language summary of the results. Uses the light
+   KU Blue tint background with a strong KU Blue left border.
+   ============================================================ */
+.interpretation {
+  margin-top: 22px;
+  padding: 18px 22px;
+  background-color: var(--bg-callout);
+  border-left: 4px solid var(--ku-blue);
+  border-radius: 4px;
+}
+
+.interpretation-label {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ku-blue);
+  margin-bottom: 8px;
+}
+
+.interpretation p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.interpretation em {
+  /* Italicized statistical symbols like t, p, F */
+  font-style: italic;
+}
+
+.stat-num {
+  /* Inline numeric values embedded in the interpretation prose */
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background-color: var(--bg-input);
+  padding: 1px 6px;
+  border-radius: 3px;
+  color: var(--text-primary);
+  border: 1px solid var(--rule);
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer {
+  margin-top: 60px;
+  padding-top: 20px;
+  border-top: 1px solid var(--rule);
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+footer a {
+  color: var(--ku-blue);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  transition: color 0.15s;
+}
+
+footer a:hover {
+  color: var(--ku-blue-hover);
+}
+
+.footer-secondary {
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+/* ============================================================
+   RESPONSIVE — PHONES AND NARROW SCREENS
+
+   Tighten padding, stack side-by-side fields vertically, and
+   reduce heading sizes. Students on phones should still be
+   able to use the tool comfortably.
+   ============================================================ */
+@media (max-width: 640px) {
+  body {
+    padding: 32px 18px 50px;
+    font-size: 15px;
+  }
+
+  h1 {
+    font-size: 28px;
+  }
+
+  h2 {
+    font-size: 22px;
+  }
+
+  .field-row,
+  .field-row-4 {
+    grid-template-columns: 1fr;
+    /* ^ Stack fields on phones instead of side-by-side. */
+    gap: 14px;
+  }
+
+  .tab {
+    font-size: 14px;
+    padding: 12px 4px;
+    margin-right: 20px;
+  }
+
+  .result-value {
+    font-size: 16px;
+  }
+
+  nav.tabs {
+    /* Let tabs scroll horizontally on very narrow screens
+       instead of wrapping into an awkward stack. */
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab {
+    flex-shrink: 0;
+    /* ^ Prevents tabs from being squished when scrolling. */
+  }
+}

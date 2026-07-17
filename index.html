@@ -1,0 +1,733 @@
+  <!-- ============================================================
+       PSYC 210 Statistical Calculators — full structure.
+
+       This file contains the HTML for all seven calculators as
+       separate tabs. Only one panel is visible at a time 
+       ============================================================ -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Introduction to Statistics Calculators</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       HEADER
+       ============================================================ -->
+  <header>
+    <p class="eyebrow">Introduction to Statistics</p>
+    <h1>Statistical <em>Calculators</em></h1>
+    <p class="subtitle">
+      A reference tool for descriptive statistics, correlation,
+      hypothesis testing, confidence intervals, and effect sizes.
+      Results match base R output.
+    </p>
+  </header>
+
+  <!-- ============================================================
+       TAB NAVIGATION
+
+       Each button has:
+         - class="tab" for styling
+         - data-panel="..." naming which section it controls
+
+       The FIRST tab starts with class="tab active" so it's
+       visible by default when the page loads.
+       ============================================================ -->
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-panel="descriptives">Descriptives</button>
+    <button class="tab" data-panel="correlation">Correlation</button>
+    <button class="tab" data-panel="ztest"><em>z</em>-test</button>
+    <button class="tab" data-panel="onesample-t">One-Sample<em> t</em></button>
+    <button class="tab" data-panel="paired-t">Paired<em> t</em></button>
+    <button class="tab" data-panel="independent-t">Independent<em> t</em></button>
+    <button class="tab" data-panel="anova">One-way ANOVA</button>
+  </nav>
+
+  <!-- ============================================================
+       PANEL 1: DESCRIPTIVE STATISTICS
+
+       No mode toggle here. Descriptives ARE summary stats,
+       so summary-mode wouldn't add anything.
+
+       Inputs: one column of numbers.
+       Outputs: n, mean, median, mode, variance (s²), SD (both
+       n and n-1 denominators), min, max, range.
+       ============================================================ -->
+  <section class="panel active" id="descriptives">
+    <div class="panel-header">
+      <h2>Descriptive Statistics</h2>
+      <p class="panel-desc">
+        Compute measures of central tendency, dispersion, and
+        shape for a single sample of numeric data.
+      </p>
+    </div>
+
+    <div class="field">
+      <label for="desc-data">
+        Sample data
+        <span class="hint">comma-, space-, or newline-separated</span>
+      </label>
+      <textarea
+        id="desc-data"
+        placeholder="e.g.  72, 68, 75, 80, 71, 69, 74, 77, 73, 70"
+      ></textarea>
+    </div>
+
+    <button class="calc-btn" id="desc-calc">Calculate</button>
+    <p class="error" id="desc-error"></p>
+    <div class="results" id="desc-results"></div>
+  </section>
+
+
+  <!-- ============================================================
+       PANEL 2: CORRELATION
+
+       Raw-data-only. Two paired columns.
+
+       We give students TWO textareas (one for X, one for Y)
+       rather than one textarea with X,Y pairs, because it's
+       easier to paste data column-by-column from a spreadsheet.
+
+       Inputs: two equal-length columns.
+       Outputs: r, r², n, t for testing H0: ρ = 0, df, p,
+       95% CI for r (via Fisher's z transformation).
+       ============================================================ -->
+  <section class="panel" id="correlation">
+    <div class="panel-header">
+      <h2>Pearson Correlation</h2>
+      <p class="panel-desc">
+        Test the linear association between two continuous
+        variables. Reports <em>r</em>, its confidence interval
+        via Fisher's <em>z</em>, and the test of H<sub>0</sub>: ρ = 0.
+      </p>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="corr-x">
+          Variable X <span class="hint">one value per line, comma, or space</span>
+        </label>
+        <textarea
+          id="corr-x"
+          placeholder="e.g.  1, 2, 3, 4, 5"
+        ></textarea>
+      </div>
+      <div class="field">
+        <label for="corr-y">
+          Variable Y
+        </label>
+        <textarea
+          id="corr-y"
+          placeholder="e.g.  2.1, 3.9, 6.2, 8.1, 10.0"
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="corr-conf">Confidence level</label>
+        <input type="number" id="corr-conf" step="any"
+               value="0.95" min="0.5" max="0.999">
+      </div>
+      <!-- Empty div keeps the grid balanced. Alternative would
+           be to make this row single-column, but keeping the
+           2-column pattern is more consistent. -->
+      <div></div>
+    </div>
+
+    <button class="calc-btn" id="corr-calc">Calculate</button>
+    <p class="error" id="corr-error"></p>
+    <div class="results" id="corr-results"></div>
+  </section>
+
+
+  <!-- ============================================================
+       PANEL 3: Z-TEST
+
+       Summary-stats-focused because z-tests require a known
+       population SD (σ), which almost always comes to students
+       as a given number in a textbook problem rather than
+       being computed from raw data.
+
+       I still include a raw-data mode for completeness, but
+       summary is the default (see the mode-toggle order).
+
+       Inputs: x̄, μ, σ, n  (summary mode)
+               data, μ, σ    (raw mode)
+       Outputs: z, p, CI for mean, Cohen's d (uses σ as
+       the standardizer).
+       ============================================================ -->
+  <section class="panel" id="ztest">
+    <div class="panel-header">
+      <h2><em>z</em>-test</h2>
+      <p class="panel-desc">
+        Tests whether a sample mean differs from a hypothesized
+        population value <strong>when the population SD (σ) is known</strong>.
+        Use the <em>t</em>-test tab if σ must be estimated from the sample.
+      </p>
+    </div>
+
+    <!-- Note: summary is listed FIRST here (and marked active)
+         because it's the more common use case for z-tests. -->
+    <div class="mode-toggle" id="z-mode">
+      <button class="active" data-mode="summary">Summary stats</button>
+      <button data-mode="raw">Raw data</button>
+    </div>
+
+    <!-- SUMMARY input for z-test -->
+    <div class="input-section" id="z-summary">
+      <div class="field-row">
+        <div class="field">
+          <label for="z-mean">Sample mean (x̄)</label>
+          <input type="number" id="z-mean" step="any" placeholder="e.g. 105">
+        </div>
+        <div class="field">
+          <label for="z-n">Sample size (n)</label>
+          <input type="number" id="z-n" step="1" min="1" placeholder="e.g. 25">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="z-mu-sum">
+            μ <span class="hint">hypothesized population mean</span>
+          </label>
+          <input type="number" id="z-mu-sum" step="any" placeholder="e.g. 100">
+        </div>
+        <div class="field">
+          <label for="z-sigma-sum">
+            σ <span class="hint">known population SD</span>
+          </label>
+          <input type="number" id="z-sigma-sum" step="any" placeholder="e.g. 15">
+        </div>
+      </div>
+      <div class="field">
+        <label for="z-conf-sum">Confidence level</label>
+        <input type="number" id="z-conf-sum" step="any"
+               value="0.95" min="0.5" max="0.999">
+      </div>
+    </div>
+
+    <!-- RAW input for z-test — hidden by default -->
+    <div class="input-section" id="z-raw" style="display: none;">
+      <div class="field">
+        <label for="z-data">Sample data</label>
+        <textarea id="z-data" placeholder="e.g.  102, 108, 95, 110, 103"></textarea>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="z-mu-raw">μ (hypothesized mean)</label>
+          <input type="number" id="z-mu-raw" step="any" placeholder="e.g. 100">
+        </div>
+        <div class="field">
+          <label for="z-sigma-raw">σ (known population SD)</label>
+          <input type="number" id="z-sigma-raw" step="any" placeholder="e.g. 15">
+        </div>
+      </div>
+      <div class="field">
+        <label for="z-conf-raw">Confidence level</label>
+        <input type="number" id="z-conf-raw" step="any"
+               value="0.95" min="0.5" max="0.999">
+      </div>
+    </div>
+
+    <button class="calc-btn" id="z-calc">Calculate</button>
+    <p class="error" id="z-error"></p>
+    <div class="results" id="z-results"></div>
+  </section>
+
+
+  <!-- ============================================================
+       PANEL 4: SINGLE-SAMPLE T-TEST
+
+       This is the one we prototyped previously. Both modes
+       supported. Raw is the default since it's more educational
+       (students see the full computation from data).
+       ============================================================ -->
+  <section class="panel" id="onesample-t">
+    <div class="panel-header">
+      <h2>Single-sample <em>t</em>-test</h2>
+      <p class="panel-desc">
+        Tests whether a sample mean differs from a hypothesized
+        value when the population SD is <em>unknown</em> and must
+        be estimated from the sample.
+      </p>
+    </div>
+
+    <div class="mode-toggle" id="t1-mode">
+      <button class="active" data-mode="raw">Raw data</button>
+      <button data-mode="summary">Summary stats</button>
+    </div>
+
+    <div class="input-section" id="t1-raw">
+      <div class="field">
+        <label for="t1-data">Sample data</label>
+        <textarea id="t1-data" placeholder="e.g.  72, 68, 75, 80, 71, 69, 74, 77, 73, 70"></textarea>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="t1-mu-raw">μ₀ (hypothesized mean)</label>
+          <input type="number" id="t1-mu-raw" step="any" placeholder="e.g. 70">
+        </div>
+        <div class="field">
+          <label for="t1-conf-raw">Confidence level</label>
+          <input type="number" id="t1-conf-raw" step="any"
+                 value="0.95" min="0.5" max="0.999">
+        </div>
+      </div>
+    </div>
+
+    <div class="input-section" id="t1-summary" style="display: none;">
+      <div class="field-row">
+        <div class="field">
+          <label for="t1-mean">Sample mean (x̄)</label>
+          <input type="number" id="t1-mean" step="any" placeholder="e.g. 72.9">
+        </div>
+        <div class="field">
+          <label for="t1-sd">Sample SD (n−1 denominator)</label>
+          <input type="number" id="t1-sd" step="any" placeholder="e.g. 3.73">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="t1-n">Sample size (n)</label>
+          <input type="number" id="t1-n" step="1" min="2" placeholder="e.g. 10">
+        </div>
+        <div class="field">
+          <label for="t1-mu-sum">μ₀ (hypothesized mean)</label>
+          <input type="number" id="t1-mu-sum" step="any" placeholder="e.g. 70">
+        </div>
+      </div>
+      <div class="field">
+        <label for="t1-conf-sum">Confidence level</label>
+        <input type="number" id="t1-conf-sum" step="any"
+               value="0.95" min="0.5" max="0.999">
+      </div>
+    </div>
+
+    <button class="calc-btn" id="t1-calc">Calculate</button>
+    <p class="error" id="t1-error"></p>
+    <div class="results" id="t1-results"></div>
+  </section>
+
+
+  <!-- ============================================================
+       PANEL 5: PAIRED-SAMPLE T-TEST
+
+       Two paired columns of the same length (before/after or
+       matched pairs). The calculation just runs a one-sample
+       t-test on the difference scores, but we present it as
+       its own calculator for teaching clarity.
+
+       Raw mode: two columns.
+       Summary mode: mean of differences, SD of differences, n.
+
+       Note: Summary-stat problems for paired t are usually
+       given as mean_D and SD_D directly, NOT as mean1, SD1,
+       mean2, SD2. Requesting the latter would require the
+       correlation between measurements to compute SD_D correctly.
+       ============================================================ -->
+  <section class="panel" id="paired-t">
+    <div class="panel-header">
+      <h2>Paired-sample <em>t</em>-test</h2>
+      <p class="panel-desc">
+        Tests whether the mean difference between two matched
+        measurements (e.g., before vs. after) differs from zero.
+      </p>
+    </div>
+
+    <div class="mode-toggle" id="tp-mode">
+      <button class="active" data-mode="raw">Raw data</button>
+      <button data-mode="summary">Summary stats</button>
+    </div>
+
+    <!-- RAW: two paired columns -->
+    <div class="input-section" id="tp-raw">
+      <div class="field-row">
+        <div class="field">
+          <label for="tp-x1">
+            Measurement 1 <span class="hint">e.g., before</span>
+          </label>
+          <textarea id="tp-x1" placeholder="e.g.  72, 68, 75, 80, 71"></textarea>
+        </div>
+        <div class="field">
+          <label for="tp-x2">
+            Measurement 2 <span class="hint">e.g., after</span>
+          </label>
+          <textarea id="tp-x2" placeholder="e.g.  74, 71, 78, 79, 73"></textarea>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="tp-mu-raw">
+            μ<sub>D</sub> <span class="hint">hypothesized mean difference, usually 0</span>
+          </label>
+          <input type="number" id="tp-mu-raw" step="any" value="0">
+        </div>
+        <div class="field">
+          <label for="tp-conf-raw">Confidence level</label>
+          <input type="number" id="tp-conf-raw" step="any"
+                 value="0.95" min="0.5" max="0.999">
+        </div>
+      </div>
+    </div>
+
+    <!-- SUMMARY: mean and SD of differences directly -->
+    <div class="input-section" id="tp-summary" style="display: none;">
+      <div class="field-row">
+        <div class="field">
+          <label for="tp-mean-d">
+            Mean of differences (D̄)
+          </label>
+          <input type="number" id="tp-mean-d" step="any" placeholder="e.g. 2.4">
+        </div>
+        <div class="field">
+          <label for="tp-sd-d">
+            SD of differences (s<sub>D</sub>)
+          </label>
+          <input type="number" id="tp-sd-d" step="any" placeholder="e.g. 1.8">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="tp-n">
+            Number of pairs (n)
+          </label>
+          <input type="number" id="tp-n" step="1" min="2" placeholder="e.g. 20">
+        </div>
+        <div class="field">
+          <label for="tp-mu-sum">
+            μ<sub>D</sub> <span class="hint">usually 0</span>
+          </label>
+          <input type="number" id="tp-mu-sum" step="any" value="0">
+        </div>
+      </div>
+      <div class="field">
+        <label for="tp-conf-sum">Confidence level</label>
+        <input type="number" id="tp-conf-sum" step="any"
+               value="0.95" min="0.5" max="0.999">
+      </div>
+    </div>
+
+    <button class="calc-btn" id="tp-calc">Calculate</button>
+    <p class="error" id="tp-error"></p>
+    <div class="results" id="tp-results"></div>
+  </section>
+
+
+  <!-- ============================================================
+       PANEL 6: INDEPENDENT-SAMPLE T-TEST
+
+       Two independent groups of possibly different sizes.
+       Includes a checkbox for pooled vs. Welch variance
+       assumption. Default is unchecked = Welch, matching R's
+       t.test() default.
+
+       Raw mode: two columns of possibly different lengths.
+       Summary mode: means, SDs, and ns for each group.
+       ============================================================ -->
+  <section class="panel" id="independent-t">
+    <div class="panel-header">
+      <h2>Independent-samples <em>t</em>-test</h2>
+      <p class="panel-desc">
+        Compares means of two independent groups when the population 
+        SDs are unknown and assumed to be equal. 
+      </p>
+    </div>
+
+    <div class="mode-toggle" id="ti-mode">
+      <button class="active" data-mode="raw">Raw data</button>
+      <button data-mode="summary">Summary stats</button>
+    </div>
+
+    <!-- RAW: two independent columns, different lengths OK -->
+    <div class="input-section" id="ti-raw">
+      <div class="field-row">
+        <div class="field">
+          <label for="ti-x1">Group 1 data</label>
+          <textarea id="ti-x1" placeholder="e.g.  72, 68, 75, 80, 71"></textarea>
+        </div>
+        <div class="field">
+          <label for="ti-x2">Group 2 data</label>
+          <textarea id="ti-x2" placeholder="e.g.  65, 70, 62, 68, 66, 71"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUMMARY: mean, SD, n for each group -->
+    <div class="input-section" id="ti-summary" style="display: none;">
+      <div class="field-row">
+        <div class="field">
+          <label for="ti-mean1">Group 1 mean (x̄₁)</label>
+          <input type="number" id="ti-mean1" step="any" placeholder="e.g. 73.2">
+        </div>
+        <div class="field">
+          <label for="ti-mean2">Group 2 mean (x̄₂)</label>
+          <input type="number" id="ti-mean2" step="any" placeholder="e.g. 67.0">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="ti-sd1">Group 1 SD (s₁)</label>
+          <input type="number" id="ti-sd1" step="any" placeholder="e.g. 4.5">
+        </div>
+        <div class="field">
+          <label for="ti-sd2">Group 2 SD (s₂)</label>
+          <input type="number" id="ti-sd2" step="any" placeholder="e.g. 3.2">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="ti-n1">Group 1 size (n₁)</label>
+          <input type="number" id="ti-n1" step="1" min="2" placeholder="e.g. 5">
+        </div>
+        <div class="field">
+          <label for="ti-n2">Group 2 size (n₂)</label>
+          <input type="number" id="ti-n2" step="1" min="2" placeholder="e.g. 6">
+        </div>
+      </div>
+    </div>
+
+    <!-- Options that apply to both modes -->
+    <div class="field-row">
+      <div class="field">
+       <label for="ti-conf">Confidence level</label>
+       <input type="number" id="ti-conf" step="any"
+               value="0.95" min="0.5" max="0.999">
+     </div>
+     <div></div>
+    </div>
+
+    <button class="calc-btn" id="ti-calc">Calculate</button>
+    <p class="error" id="ti-error"></p>
+    <div class="results" id="ti-results"></div>
+  </section>
+
+
+  <!-- ============================================================
+       PANEL 7: ONE-WAY BETWEEN-GROUPS ANOVA
+
+       Variable number of groups. This is the trickiest
+       structurally because we don't know in advance how many
+       groups the student will enter.
+
+       Approach: start with 3 group textareas visible (a
+       reasonable starting number), plus "+ Add group" and
+       "− Remove group" buttons. JavaScript will handle the
+       dynamic addition/removal.
+
+       For summary mode: same idea, but with rows of
+       (name, mean, SD, n) fields.
+       ============================================================ -->
+  <section class="panel" id="anova">
+    <div class="panel-header">
+      <h2>One-way Between-Groups ANOVA</h2>
+      <p class="panel-desc">
+        Compares means across three or more independent groups.
+        Reports <em>F</em>, <em>p</em>, and effect sizes
+        (η², ω², partial η²).
+      </p>
+    </div>
+
+    <div class="mode-toggle" id="av-mode">
+      <button class="active" data-mode="raw">Raw data</button>
+      <button data-mode="summary">Summary stats</button>
+    </div>
+
+    <!-- RAW: dynamic list of group columns
+         Note the "id='av-raw-groups'" container. JavaScript
+         will insert additional group fields into this element
+         when "+ Add group" is clicked. -->
+    <div class="input-section" id="av-raw">
+      <div id="av-raw-groups">
+        <!-- Group 1 -->
+        <div class="group-row" data-group-index="1">
+          <div class="field-row">
+            <div class="field">
+              <label>
+                Group 1 name
+                <span class="hint">optional label</span>
+              </label>
+              <input type="text" class="av-raw-name"
+                     placeholder="e.g. Control">
+            </div>
+            <div class="field">
+              <label>Group 1 data</label>
+              <textarea class="av-raw-data"
+                        placeholder="e.g.  5, 7, 6, 8, 5"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Group 2 -->
+        <div class="group-row" data-group-index="2">
+          <div class="field-row">
+            <div class="field">
+              <label>Group 2 name</label>
+              <input type="text" class="av-raw-name"
+                     placeholder="e.g. Treatment A">
+            </div>
+            <div class="field">
+              <label>Group 2 data</label>
+              <textarea class="av-raw-data"
+                        placeholder="e.g.  8, 9, 10, 8, 11"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Group 3 -->
+        <div class="group-row" data-group-index="3">
+          <div class="field-row">
+            <div class="field">
+              <label>Group 3 name</label>
+              <input type="text" class="av-raw-name"
+                     placeholder="e.g. Treatment B">
+            </div>
+            <div class="field">
+              <label>Group 3 data</label>
+              <textarea class="av-raw-data"
+                        placeholder="e.g.  12, 14, 13, 15, 14"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add/remove group buttons.
+           These are separate from the calculate button because
+           they modify the FORM, not run the calculation. -->
+      <div class="group-controls">
+        <button type="button" class="group-btn" id="av-raw-add">
+          + Add group
+        </button>
+        <button type="button" class="group-btn" id="av-raw-remove">
+          − Remove group
+        </button>
+      </div>
+    </div>
+
+    <!-- SUMMARY: same dynamic list, but with mean/SD/n fields
+         instead of a raw data textarea. -->
+    <div class="input-section" id="av-summary" style="display: none;">
+      <div id="av-sum-groups">
+        <!-- Group 1 -->
+        <div class="group-row" data-group-index="1">
+          <div class="field-row-4">
+            <div class="field">
+              <label>Group 1 name</label>
+              <input type="text" class="av-sum-name" placeholder="e.g. Control">
+            </div>
+            <div class="field">
+              <label>Mean</label>
+              <input type="number" class="av-sum-mean" step="any" placeholder="6.2">
+            </div>
+            <div class="field">
+              <label>SD</label>
+              <input type="number" class="av-sum-sd" step="any" placeholder="1.3">
+            </div>
+            <div class="field">
+              <label>n</label>
+              <input type="number" class="av-sum-n" step="1" min="2" placeholder="5">
+            </div>
+          </div>
+        </div>
+
+        <!-- Group 2 -->
+        <div class="group-row" data-group-index="2">
+          <div class="field-row-4">
+            <div class="field">
+              <label>Group 2 name</label>
+              <input type="text" class="av-sum-name">
+            </div>
+            <div class="field">
+              <label>Mean</label>
+              <input type="number" class="av-sum-mean" step="any">
+            </div>
+            <div class="field">
+              <label>SD</label>
+              <input type="number" class="av-sum-sd" step="any">
+            </div>
+            <div class="field">
+              <label>n</label>
+              <input type="number" class="av-sum-n" step="1" min="2">
+            </div>
+          </div>
+        </div>
+
+        <!-- Group 3 -->
+        <div class="group-row" data-group-index="3">
+          <div class="field-row-4">
+            <div class="field">
+              <label>Group 3 name</label>
+              <input type="text" class="av-sum-name">
+            </div>
+            <div class="field">
+              <label>Mean</label>
+              <input type="number" class="av-sum-mean" step="any">
+            </div>
+            <div class="field">
+              <label>SD</label>
+              <input type="number" class="av-sum-sd" step="any">
+            </div>
+            <div class="field">
+              <label>n</label>
+              <input type="number" class="av-sum-n" step="1" min="2">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group-controls">
+        <button type="button" class="group-btn" id="av-sum-add">
+          + Add group
+        </button>
+        <button type="button" class="group-btn" id="av-sum-remove">
+          − Remove group
+        </button>
+      </div>
+    </div>
+
+    <!-- Confidence level applies to both modes -->
+    <div class="field-row">
+      <div class="field">
+        <label for="av-conf">Confidence level</label>
+        <input type="number" id="av-conf" step="any"
+               value="0.95" min="0.5" max="0.999">
+      </div>
+      <div></div>
+    </div>
+
+    <button class="calc-btn" id="av-calc">Calculate</button>
+    <p class="error" id="av-error"></p>
+    <div class="results" id="av-results"></div>
+  </section>
+
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer>
+    <p>A statistical calculator for introductory statistics courses. 
+    Created by Rebecca Wood, with assistance from AI coding tools.</p> 
+    <p class="footer-secondary">Statistical distributions computed with
+    <a href="https://jstat.github.io/">jStat</a>. Calculations validated against
+    R 4.6.1 and prior statistical tools.</p>
+    <p class="footer-secondary">Students: report issues to
+    <a href="mailto:woodr@ku.edu?subject=PSYC 210 Calculator Issue">woodr@ku.edu</a>.
+    Bug reports and incorrect calculations can be filed on
+    <a href="https://github.com/rebwood9/stats-calculator/issues">GitHub</a>.</p>
+    <p class="footer-secondary">© 2026 Rebecca Wood</p>
+  </footer>
+
+  <!-- ============================================================
+       LOAD JAVASCRIPT
+       ============================================================ -->
+  <script src="https://cdn.jsdelivr.net/npm/jstat@1.9.6/dist/jstat.min.js"></script>
+  <script src="stats.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>

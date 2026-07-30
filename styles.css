@@ -154,7 +154,7 @@ code {
 nav.tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 0;
+  gap: 0 20px;
   border-bottom: 1px solid var(--rule);
   margin-bottom: 36px;
 }

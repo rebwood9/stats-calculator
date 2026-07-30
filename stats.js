@@ -96,6 +96,24 @@ function zPvalueTwoTailed(z) {
   return 2 * (1 - jStat.normal.cdf(Math.abs(z), 0, 1));
 }
 
+/* One-tailed p-values from the t distribution.
+   'upper' → p = P(T ≥ t) = 1 − cdf(t)
+   'lower' → p = P(T ≤ t) = cdf(t)
+   R equivalents: pt(t, df, lower.tail = FALSE) and pt(t, df). */
+function tPvalueUpper(t, df) {
+  return 1 - jStat.studentt.cdf(t, df);
+}
+function tPvalueLower(t, df) {
+  return jStat.studentt.cdf(t, df);
+}
+
+/* Critical t for a ONE-tailed test at significance level (1 − confidence).
+   Uses upperTail = confidence (not (1+confidence)/2), which is the
+   one-sided cutoff. R equivalent: qt(confidence, df). */
+function tCriticalOneTailed(df, confidence) {
+  return jStat.studentt.inv(confidence, df);
+}
+
 /* One-tailed p-values from the standard normal (z) distribution.
    'upper' tests H1: mean > mu0  → p = P(Z ≥ z) = 1 − Phi(z)
    'lower' tests H1: mean < mu0  → p = P(Z ≤ z) = Phi(z)
@@ -127,6 +145,26 @@ function zCritical(confidence) {
   return jStat.normal.inv(upperTail, 0, 1);
 }
 
+/* Given a t statistic, its df, the tail, and confidence, return the
+   correct p-value and the critical t to DISPLAY for the hypothesis
+   test. (The CI critical value is computed separately and stays
+   two-tailed.) */
+function tTestPandCrit(t, df, tail, confidence) {
+  let p, tCritDisplay;
+  if (tail === 'upper') {
+    p = tPvalueUpper(t, df);
+    tCritDisplay = tCriticalOneTailed(df, confidence);
+  } else if (tail === 'lower') {
+    p = tPvalueLower(t, df);
+    tCritDisplay = -tCriticalOneTailed(df, confidence);
+    // ^ negative: a lower-tailed test rejects when t is below the
+    //   negative cutoff, so we show the signed critical value.
+  } else {
+    p = tPvalueTwoTailed(t, df);
+    tCritDisplay = tCritical(df, confidence);
+  }
+  return { p, tCritDisplay };
+}
 
 /* ============================================================
    SECTION 3: DESCRIPTIVE STATISTICS
@@ -296,14 +334,18 @@ function zTest(data, mu0, sigma, confidence, tail) {
    Tests H0: mu = mu0 when population SD is unknown.
    ============================================================ */
 
-function oneSampleTTestFromSummary(xbar, s, n, mu0, confidence) {
+function oneSampleTTestFromSummary(xbar, s, n, mu0, confidence, tail) {
   if (confidence === undefined) confidence = 0.95;
+  if (tail === undefined) tail = 'two';
 
   const se = s / Math.sqrt(n);
   const df = n - 1;
   const t = (xbar - mu0) / se;
-  const p = tPvalueTwoTailed(t, df);
 
+  // Tail-aware p-value and the critical t to display.
+  const { p, tCritDisplay } = tTestPandCrit(t, df, tail, confidence);
+
+  // CI stays two-sided: use the two-tailed critical value.
   const tcrit = tCritical(df, confidence);
   const ciLower = xbar - tcrit * se;
   const ciUpper = xbar + tcrit * se;
@@ -317,6 +359,8 @@ function oneSampleTTestFromSummary(xbar, s, n, mu0, confidence) {
 
   return {
     xbar, s, n, se, df, t, p,
+    tCrit: tCritDisplay,
+    tail,
     ciLower, ciUpper,
     cohenD,
     dCILower: cohenD - tcrit * dSE,
@@ -325,11 +369,11 @@ function oneSampleTTestFromSummary(xbar, s, n, mu0, confidence) {
   };
 }
 
-function oneSampleTTest(data, mu0, confidence) {
+function oneSampleTTest(data, mu0, confidence, tail) {
   const xbar = mean(data);
   const s = sampleSD(data);
   const n = data.length;
-  return oneSampleTTestFromSummary(xbar, s, n, mu0, confidence);
+  return oneSampleTTestFromSummary(xbar, s, n, mu0, confidence, tail);
 }
 
 
@@ -342,14 +386,17 @@ function oneSampleTTest(data, mu0, confidence) {
    This is what PSYC 210 uses.
    ============================================================ */
 
-function pairedTTestFromSummary(meanD, sdD, n, muD0, confidence) {
+function pairedTTestFromSummary(meanD, sdD, n, muD0, confidence, tail) {
   if (confidence === undefined) confidence = 0.95;
   if (muD0 === undefined) muD0 = 0;
+  if (tail === undefined) tail = 'two';
 
   const se = sdD / Math.sqrt(n);
   const df = n - 1;
   const t = (meanD - muD0) / se;
-  const p = tPvalueTwoTailed(t, df);
+  
+  // Tail-aware p-value and the critical t to display.
+  const { p, tCritDisplay } = tTestPandCrit(t, df, tail, confidence);
 
   const tcrit = tCritical(df, confidence);
   const ciLower = meanD - tcrit * se;
@@ -361,6 +408,8 @@ function pairedTTestFromSummary(meanD, sdD, n, muD0, confidence) {
 
   return {
     meanD, sdD, n, se, df, t, p,
+    tCrit: tCritDisplay,
+    tail,
     ciLower, ciUpper,
     cohenD,
     dCILower: cohenD - tcrit * dSE,
@@ -369,7 +418,7 @@ function pairedTTestFromSummary(meanD, sdD, n, muD0, confidence) {
   };
 }
 
-function pairedTTest(x1, x2, muD0, confidence) {
+function pairedTTest(x1, x2, muD0, confidence, tail) {
   if (x1.length !== x2.length) {
     throw new Error('Paired data must have equal lengths');
   }
@@ -378,7 +427,7 @@ function pairedTTest(x1, x2, muD0, confidence) {
   const meanD = mean(diffs);
   const sdD = sampleSD(diffs);
   const n = diffs.length;
-  return pairedTTestFromSummary(meanD, sdD, n, muD0, confidence);
+  return pairedTTestFromSummary(meanD, sdD, n, muD0, confidence, tail);
 }
 
 
@@ -395,9 +444,10 @@ function pairedTTest(x1, x2, muD0, confidence) {
    ============================================================ */
 
 function independentTTestFromSummary(
-  xbar1, s1, n1, xbar2, s2, n2, confidence
+  xbar1, s1, n1, xbar2, s2, n2, confidence, tail
 ) {
   if (confidence === undefined) confidence = 0.95;
+  if (tail === undefined) tail = 'two';
 
   const df = n1 + n2 - 2;
   // Pooled variance and SD
@@ -407,7 +457,9 @@ function independentTTestFromSummary(
 
   const meanDiff = xbar1 - xbar2;
   const t = meanDiff / se;
-  const p = tPvalueTwoTailed(t, df);
+  
+  // Tail-aware p-value and the critical t to display.
+  const { p, tCritDisplay } = tTestPandCrit(t, df, tail, confidence);
 
   const tcrit = tCritical(df, confidence);
   const ciLower = meanDiff - tcrit * se;
@@ -422,6 +474,8 @@ function independentTTestFromSummary(
     xbar1, s1, n1,
     xbar2, s2, n2,
     meanDiff, sp, se, df, t, p,
+    tCrit: tCritDisplay,
+    tail,
     ciLower, ciUpper,
     cohenD,
     dCILower: cohenD - tcrit * dSE,
@@ -430,7 +484,7 @@ function independentTTestFromSummary(
   };
 }
 
-function independentTTest(x1, x2, confidence) {
+function independentTTest(x1, x2, confidence, tail) {
   const xbar1 = mean(x1);
   const s1 = sampleSD(x1);
   const n1 = x1.length;
@@ -438,7 +492,7 @@ function independentTTest(x1, x2, confidence) {
   const s2 = sampleSD(x2);
   const n2 = x2.length;
   return independentTTestFromSummary(
-    xbar1, s1, n1, xbar2, s2, n2, confidence
+    xbar1, s1, n1, xbar2, s2, n2, confidence, tail
   );
 }
 

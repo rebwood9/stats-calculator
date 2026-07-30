@@ -84,23 +84,16 @@ document.getElementById('tabs').addEventListener('click', function(event) {
   document.getElementById(targetPanelId).classList.add('active');
 });
 
-
 /* ============================================================
-   SECTION 3: MODE TOGGLES (Raw vs Summary)
+   SECTION 3a: TAIL TOGGLES
 
-   Every calculator that has a mode toggle uses the same
-   naming convention:
-     - Toggle container:   {prefix}-mode
-     - Raw input section:  {prefix}-raw
-     - Summary section:    {prefix}-summary
-
-   So we can wire them all up with a single helper.
-   ============================================================ */
-
-/* Wire up a tail-selection toggle (two-tailed / one-tailed upper /
+   Wire up a tail-selection toggle (two-tailed / one-tailed upper /
    one-tailed lower). Same click-to-activate behavior as the mode
    toggle, but for choosing the alternative hypothesis direction.
-   Reused across the z-test and t-tests. */
+   Reused across the z-test and t-tests.
+   
+   ============================================================ */
+
 function wireTailToggle(toggleId) {
   const toggle = document.getElementById(toggleId);
   if (!toggle) return;
@@ -119,11 +112,21 @@ function getTail(toggleId) {
   return activeBtn ? activeBtn.dataset.tail : 'two';
 }
 
-// Wire the z-test tail toggle now; t-tests will be added later.
-wireTailToggle('z-tail');
+// Wire all tail toggles (z-test and the three t-tests).
+['z-tail', 't1-tail', 'tp-tail', 'ti-tail'].forEach(wireTailToggle);
 
+/* ============================================================
+   SECTION 3b: MODE TOGGLES (Raw vs Summary)
 
-// Wire the Mode toggle.
+   Every calculator that has a mode toggle uses the same
+   naming convention:
+     - Toggle container:   {prefix}-mode
+     - Raw input section:  {prefix}-raw
+     - Summary section:    {prefix}-summary
+
+   So we can wire them all up with a single helper.
+   ============================================================ */
+
 function wireModeToggle(prefix) {
   const toggle = document.getElementById(prefix + '-mode');
   if (!toggle) return;
@@ -352,6 +355,7 @@ document.getElementById('z-calc').addEventListener('click', function() {
 document.getElementById('t1-calc').addEventListener('click', function() {
   clearOutputs('t1');
   const mode = getMode('t1');
+  const tail = getTail('t1-tail');
   let result;
 
   if (mode === 'raw') {
@@ -363,7 +367,7 @@ document.getElementById('t1-calc').addEventListener('click', function() {
     if (isNaN(mu0)) return showError('t1', 'Enter the hypothesized mean (μ₀).');
     if (isNaN(confidence) || confidence <= 0 || confidence >= 1) confidence = 0.95;
 
-    result = oneSampleTTest(data, mu0, confidence);
+    result = oneSampleTTest(data, mu0, confidence, tail);
   } else {
     const xbar = parseFloat(document.getElementById('t1-mean').value);
     const s = parseFloat(document.getElementById('t1-sd').value);
@@ -377,11 +381,15 @@ document.getElementById('t1-calc').addEventListener('click', function() {
     if (isNaN(mu0)) return showError('t1', 'Enter the hypothesized mean.');
     if (isNaN(confidence) || confidence <= 0 || confidence >= 1) confidence = 0.95;
 
-    result = oneSampleTTestFromSummary(xbar, s, n, mu0, confidence);
+    result = oneSampleTTestFromSummary(xbar, s, n, mu0, confidence, tail);
   }
 
   const confPct = (result.confidence * 100).toFixed(0);
   const sig = result.p < 0.05;
+
+  const tailLabel = result.tail === 'upper' ? 'one-tailed (>)'
+                  : result.tail === 'lower' ? 'one-tailed (<)'
+                  : 'two-tailed';
 
   const cells = [
     ['x̄', formatNum(result.xbar)],
@@ -390,7 +398,8 @@ document.getElementById('t1-calc').addEventListener('click', function() {
     ['SE', formatNum(result.se)],
     ['t', formatNum(result.t), sig],
     ['df', result.df],
-    ['p', formatPValue(result.p), sig],
+    ['t crit', formatNum(result.tCrit)],
+    [`p (${tailLabel})`, formatPValue(result.p), sig],
     [`${confPct}% CI for mean`,
      `[${formatNum(result.ciLower)}, ${formatNum(result.ciUpper)}]`],
     ["Cohen's d", formatNum(result.cohenD)],
@@ -409,6 +418,7 @@ document.getElementById('t1-calc').addEventListener('click', function() {
 document.getElementById('tp-calc').addEventListener('click', function() {
   clearOutputs('tp');
   const mode = getMode('tp');
+  const tail = getTail('tp-tail');
   let result;
 
   if (mode === 'raw') {
@@ -427,7 +437,7 @@ document.getElementById('tp-calc').addEventListener('click', function() {
     if (isNaN(muD0)) return showError('tp', 'Enter the hypothesized mean difference.');
     if (isNaN(confidence) || confidence <= 0 || confidence >= 1) confidence = 0.95;
 
-    result = pairedTTest(x1, x2, muD0, confidence);
+    result = pairedTTest(x1, x2, muD0, confidence, tail);
   } else {
     const meanD = parseFloat(document.getElementById('tp-mean-d').value);
     const sdD = parseFloat(document.getElementById('tp-sd-d').value);
@@ -441,11 +451,15 @@ document.getElementById('tp-calc').addEventListener('click', function() {
     if (isNaN(muD0)) return showError('tp', 'Enter the hypothesized mean difference.');
     if (isNaN(confidence) || confidence <= 0 || confidence >= 1) confidence = 0.95;
 
-    result = pairedTTestFromSummary(meanD, sdD, n, muD0, confidence);
+    result = pairedTTestFromSummary(meanD, sdD, n, muD0, confidence, tail);
   }
 
   const confPct = (result.confidence * 100).toFixed(0);
   const sig = result.p < 0.05;
+  
+  const tailLabel = result.tail === 'upper' ? 'one-tailed (>)'
+                  : result.tail === 'lower' ? 'one-tailed (<)'
+                  : 'two-tailed';
 
   const cells = [
     ['D̄ (mean diff)', formatNum(result.meanD)],
@@ -454,7 +468,8 @@ document.getElementById('tp-calc').addEventListener('click', function() {
     ['SE', formatNum(result.se)],
     ['t', formatNum(result.t), sig],
     ['df', result.df],
-    ['p', formatPValue(result.p), sig],
+    ['t crit', formatNum(result.tCrit)],
+    [`p (${tailLabel})`, formatPValue(result.p), sig],
     [`${confPct}% CI for D̄`,
      `[${formatNum(result.ciLower)}, ${formatNum(result.ciUpper)}]`],
     ["Cohen's d_z", formatNum(result.cohenD)],
@@ -473,6 +488,7 @@ document.getElementById('tp-calc').addEventListener('click', function() {
 document.getElementById('ti-calc').addEventListener('click', function() {
   clearOutputs('ti');
   const mode = getMode('ti');
+  const tail = getTail('ti-tail');
   let confidence = parseFloat(document.getElementById('ti-conf').value);
   if (isNaN(confidence) || confidence <= 0 || confidence >= 1) confidence = 0.95;
 
@@ -485,7 +501,7 @@ document.getElementById('ti-calc').addEventListener('click', function() {
     if (x1.length < 2 || x2.length < 2) {
       return showError('ti', 'Enter at least 2 values in each group.');
     }
-    result = independentTTest(x1, x2, confidence);
+    result = independentTTest(x1, x2, confidence, tail);
   } else {
     const xbar1 = parseFloat(document.getElementById('ti-mean1').value);
     const xbar2 = parseFloat(document.getElementById('ti-mean2').value);
@@ -501,12 +517,16 @@ document.getElementById('ti-calc').addEventListener('click', function() {
     if (isNaN(n1) || n1 < 2 || isNaN(n2) || n2 < 2) {
       return showError('ti', 'Each group must have n ≥ 2.');
     }
-    result = independentTTestFromSummary(xbar1, s1, n1, xbar2, s2, n2, confidence);
+    result = independentTTestFromSummary(xbar1, s1, n1, xbar2, s2, n2, confidence, tail);
   }
 
   const confPct = (result.confidence * 100).toFixed(0);
   const sig = result.p < 0.05;
 
+  const tailLabel = result.tail === 'upper' ? 'one-tailed (>)'
+                  : result.tail === 'lower' ? 'one-tailed (<)'
+                  : 'two-tailed';
+                  
   const cells = [
     ['x̄₁', formatNum(result.xbar1)],
     ['x̄₂', formatNum(result.xbar2)],
@@ -519,7 +539,8 @@ document.getElementById('ti-calc').addEventListener('click', function() {
     ['SE', formatNum(result.se)],
     ['t', formatNum(result.t), sig],
     ['df', result.df],
-    ['p', formatPValue(result.p), sig],
+    ['t crit', formatNum(result.tCrit)],
+    [`p (${tailLabel})`, formatPValue(result.p), sig],
     [`${confPct}% CI for x̄₁ − x̄₂`,
      `[${formatNum(result.ciLower)}, ${formatNum(result.ciUpper)}]`],
     ["Cohen's d", formatNum(result.cohenD)],

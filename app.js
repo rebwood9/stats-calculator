@@ -97,6 +97,33 @@ document.getElementById('tabs').addEventListener('click', function(event) {
    So we can wire them all up with a single helper.
    ============================================================ */
 
+/* Wire up a tail-selection toggle (two-tailed / one-tailed upper /
+   one-tailed lower). Same click-to-activate behavior as the mode
+   toggle, but for choosing the alternative hypothesis direction.
+   Reused across the z-test and t-tests. */
+function wireTailToggle(toggleId) {
+  const toggle = document.getElementById(toggleId);
+  if (!toggle) return;
+  toggle.addEventListener('click', function(event) {
+    const btn = event.target.closest('button');
+    if (!btn) return;
+    toggle.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+}
+
+/* Read the currently selected tail ('two', 'upper', or 'lower')
+   from a tail toggle. Defaults to 'two' if none is active. */
+function getTail(toggleId) {
+  const activeBtn = document.querySelector(`#${toggleId} button.active`);
+  return activeBtn ? activeBtn.dataset.tail : 'two';
+}
+
+// Wire the z-test tail toggle now; t-tests will be added later.
+wireTailToggle('z-tail');
+
+
+// Wire the Mode toggle.
 function wireModeToggle(prefix) {
   const toggle = document.getElementById(prefix + '-mode');
   if (!toggle) return;
@@ -262,6 +289,7 @@ document.getElementById('corr-calc').addEventListener('click', function() {
 document.getElementById('z-calc').addEventListener('click', function() {
   clearOutputs('z');
   const mode = getMode('z');
+  const tail = getTail('z-tail');
   let result;
 
   if (mode === 'summary') {
@@ -277,7 +305,7 @@ document.getElementById('z-calc').addEventListener('click', function() {
     if (isNaN(sigma) || sigma <= 0) return showError('z', 'Enter a positive σ.');
     if (isNaN(confidence) || confidence <= 0 || confidence >= 1) confidence = 0.95;
 
-    result = zTestFromSummary(xbar, mu0, sigma, n, confidence);
+    result = zTestFromSummary(xbar, mu0, sigma, n, confidence, tail);
   } else {
     const data = parseDataString(document.getElementById('z-data').value);
     const mu0 = parseFloat(document.getElementById('z-mu-raw').value);
@@ -289,11 +317,16 @@ document.getElementById('z-calc').addEventListener('click', function() {
     if (isNaN(sigma) || sigma <= 0) return showError('z', 'Enter a positive σ.');
     if (isNaN(confidence) || confidence <= 0 || confidence >= 1) confidence = 0.95;
 
-    result = zTest(data, mu0, sigma, confidence);
+    result = zTest(data, mu0, sigma, confidence, tail);
   }
 
   const confPct = (result.confidence * 100).toFixed(0);
   const sig = result.p < 0.05;
+
+  // Human-readable label for the p-value's tail.
+  const tailLabel = result.tail === 'upper' ? 'one-tailed (>)'
+                  : result.tail === 'lower' ? 'one-tailed (<)'
+                  : 'two-tailed';
 
   const cells = [
     ['x̄', formatNum(result.xbar)],
@@ -302,7 +335,7 @@ document.getElementById('z-calc').addEventListener('click', function() {
     ['n', result.n],
     ['SE', formatNum(result.se)],
     ['z', formatNum(result.z), sig],
-    ['p', formatPValue(result.p), sig],
+    [`p (${tailLabel})`, formatPValue(result.p), sig],
     [`${confPct}% CI for mean`,
      `[${formatNum(result.ciLower)}, ${formatNum(result.ciUpper)}]`],
     ["Cohen's d", formatNum(result.cohenD)]

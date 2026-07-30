@@ -96,6 +96,17 @@ function zPvalueTwoTailed(z) {
   return 2 * (1 - jStat.normal.cdf(Math.abs(z), 0, 1));
 }
 
+/* One-tailed p-values from the standard normal (z) distribution.
+   'upper' tests H1: mean > mu0  → p = P(Z ≥ z) = 1 − Phi(z)
+   'lower' tests H1: mean < mu0  → p = P(Z ≤ z) = Phi(z)
+   R equivalents: pnorm(z, lower.tail = FALSE) and pnorm(z). */
+function zPvalueUpper(z) {
+  return 1 - jStat.normal.cdf(z, 0, 1);
+}
+function zPvalueLower(z) {
+  return jStat.normal.cdf(z, 0, 1);
+}
+
 /* One-tailed p-value from F distribution (right tail, as in ANOVA).
    R equivalent: pf(F, df1, df2, lower.tail = FALSE) */
 function fPvalue(F, df1, df2) {
@@ -240,13 +251,21 @@ function correlation(x, y, confidence) {
    Two entry points: from raw data or from summary stats.
    ============================================================ */
 
-function zTestFromSummary(xbar, mu0, sigma, n, confidence) {
+function zTestFromSummary(xbar, mu0, sigma, n, confidence, tail) {
   if (confidence === undefined) confidence = 0.95;
+  if (tail === undefined) tail = 'two';
 
   const se = sigma / Math.sqrt(n);
   const z = (xbar - mu0) / se;
-  const p = zPvalueTwoTailed(z);
 
+  // p-value depends on the alternative hypothesis direction.
+  let p;
+  if (tail === 'upper')      p = zPvalueUpper(z);
+  else if (tail === 'lower') p = zPvalueLower(z);
+  else                       p = zPvalueTwoTailed(z);
+
+  // CI stays two-sided regardless of tail (matches intro-course
+  // convention; the tail choice affects only the p-value).
   const zcrit = zCritical(confidence);
   const ciLower = xbar - zcrit * se;
   const ciUpper = xbar + zcrit * se;
@@ -259,14 +278,15 @@ function zTestFromSummary(xbar, mu0, sigma, n, confidence) {
     xbar, mu0, sigma, n, se, z, p,
     ciLower, ciUpper,
     cohenD,
+    tail,
     confidence
   };
 }
 
-function zTest(data, mu0, sigma, confidence) {
+function zTest(data, mu0, sigma, confidence, tail) {
   const xbar = mean(data);
   const n = data.length;
-  return zTestFromSummary(xbar, mu0, sigma, n, confidence);
+  return zTestFromSummary(xbar, mu0, sigma, n, confidence, tail);
 }
 
 

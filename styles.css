@@ -276,6 +276,41 @@ h2 {
   color: white;
 }
 
+/* ============================================================
+   TAIL TOGGLE (alternative hypothesis direction)
+
+   Same segmented-control look as the mode toggle, used to pick
+   two-tailed vs one-tailed (upper/lower) hypothesis tests.
+   ============================================================ */
+.tail-toggle {
+  display: inline-flex;
+  background-color: var(--bg-panel);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 3px;
+}
+
+.tail-toggle button {
+  background: transparent;
+  border: none;
+  padding: 8px 16px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.15s, color 0.15s;
+  font-weight: 500;
+}
+
+.tail-toggle button:hover:not(.active) {
+  color: var(--text-primary);
+}
+
+.tail-toggle button.active {
+  background-color: var(--ku-blue);
+  color: white;
+}
 
 /* ============================================================
    FORM FIELDS

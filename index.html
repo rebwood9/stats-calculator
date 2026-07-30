@@ -79,6 +79,49 @@
       ></textarea>
     </div>
 
+    <!-- Adding check boxes for each descriptive statistic -->
+    <div class="field">
+      <label>
+        Statistics to display
+        <span class="hint">select at least one</span>
+      </label>
+      <div class="checkbox-grid" id="desc-options">
+        <label class="checkbox-item">
+          <input type="checkbox" data-stat="n"> n
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" data-stat="mean"> Mean
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" data-stat="median"> Median
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" data-stat="mode"> Mode
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" data-stat="sd_sample"> SD (sample, n−1)
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" data-stat="sd_pop"> SD (population, n)
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" data-stat="variance_sample"> Variance (n−1)
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" data-stat="variance_pop"> Variance (n)
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" data-stat="min"> Min
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" data-stat="max"> Max
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" data-stat="range"> Range
+        </label>
+      </div>
+    </div>
+
     <button class="calc-btn" id="desc-calc">Calculate</button>
     <p class="error" id="desc-error"></p>
     <div class="results" id="desc-results"></div>

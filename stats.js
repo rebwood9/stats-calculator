@@ -155,29 +155,6 @@ function descriptives(data) {
   const max = sorted[n - 1];
   const range = max - min;
 
-  // Quartiles using the "type 7" method (R's default)
-  const quartile = (p) => {
-    // R's quantile type 7: linear interpolation between order stats
-    const h = (n - 1) * p;
-    const lo = Math.floor(h);
-    const hi = Math.ceil(h);
-    if (lo === hi) return sorted[lo];
-    return sorted[lo] + (h - lo) * (sorted[hi] - sorted[lo]);
-  };
-  const q1 = quartile(0.25);
-  const q3 = quartile(0.75);
-  const iqr = q3 - q1;
-
-  // Skewness (type 3 / "sample" skewness, matches most textbooks)
-  // g1 = (1/n) * sum((x - mean)^3) / sd_pop^3
-  const skewness = data.reduce((acc, x) => acc + (x - m) ** 3, 0)
-                   / (n * sd_pop ** 3);
-
-  // Kurtosis (excess kurtosis; normal distribution has kurtosis of 0)
-  // g2 = (1/n) * sum((x - mean)^4) / sd_pop^4 - 3
-  const kurtosis = data.reduce((acc, x) => acc + (x - m) ** 4, 0)
-                   / (n * sd_pop ** 4) - 3;
-
   return {
     n,
     mean: m,
@@ -189,12 +166,7 @@ function descriptives(data) {
     variance_pop: sd_pop ** 2,
     min,
     max,
-    range,
-    q1,
-    q3,
-    iqr,
-    skewness,
-    kurtosis
+    range
   };
 }
 

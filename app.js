@@ -167,6 +167,17 @@ document.getElementById('desc-calc').addEventListener('click', function() {
     return;
   }
 
+  // Which statistics did the student check? Read the data-stat
+  // attribute off every checked box in the options grid.
+  const selected = Array.from(
+    document.querySelectorAll('#desc-options input:checked')
+  ).map(box => box.dataset.stat);
+
+  if (selected.length === 0) {
+    showError('desc', 'Please select at least one statistic to display.');
+    return;
+  }
+
   const r = descriptives(data);
 
   // Build the mode display string. Empty array = no mode.
@@ -174,24 +185,28 @@ document.getElementById('desc-calc').addEventListener('click', function() {
     ? 'None'
     : r.modes.map(m => formatNum(m, 2)).join(', ');
 
-  const cells = [
-    ['n', r.n],
-    ['Mean', formatNum(r.mean)],
-    ['Median', formatNum(r.median)],
-    ['Mode', modeStr],
-    ['SD (sample, n−1)', formatNum(r.sd_sample)],
-    ['SD (population, n)', formatNum(r.sd_pop)],
-    ['Variance (n−1)', formatNum(r.variance_sample)],
-    ['Variance (n)', formatNum(r.variance_pop)],
-    ['Min', formatNum(r.min)],
-    ['Max', formatNum(r.max)],
-    ['Range', formatNum(r.range)],
-    ['Q1', formatNum(r.q1)],
-    ['Q3', formatNum(r.q3)],
-    ['IQR', formatNum(r.iqr)],
-    ['Skewness', formatNum(r.skewness)],
-    ['Kurtosis (excess)', formatNum(r.kurtosis)]
-  ];
+  // Map each selectable stat to its [label, value] pair. Only the
+  // keys present here can be displayed; the handler picks from this
+  // based on what's checked.
+  const allCells = {
+    n:               ['n', r.n],
+    mean:            ['Mean', formatNum(r.mean)],
+    median:          ['Median', formatNum(r.median)],
+    mode:            ['Mode', modeStr],
+    sd_sample:       ['SD (sample, n−1)', formatNum(r.sd_sample)],
+    sd_pop:          ['SD (population, n)', formatNum(r.sd_pop)],
+    variance_sample: ['Variance (n−1)', formatNum(r.variance_sample)],
+    variance_pop:    ['Variance (n)', formatNum(r.variance_pop)],
+    min:             ['Min', formatNum(r.min)],
+    max:             ['Max', formatNum(r.max)],
+    range:           ['Range', formatNum(r.range)]
+  };
+
+  // Keep the display order fixed (the order of allCells' keys),
+  // regardless of the order boxes were clicked.
+  const cells = Object.keys(allCells)
+    .filter(key => selected.includes(key))
+    .map(key => allCells[key]);
 
   renderResults('desc', cells);
 });

@@ -42,11 +42,11 @@
   <nav class="tabs" id="tabs">
     <button class="tab active" data-panel="descriptives">Descriptives</button>
     <button class="tab" data-panel="correlation">Correlation</button>
-    <button class="tab" data-panel="ztest"><em>z</em>-test</button>
-    <button class="tab" data-panel="onesample-t">One-Sample_<em>t</em></button>
+    <button class="tab" data-panel="ztest"><em>z</em>-Test</button>
+    <button class="tab" data-panel="onesample-t">Single-Sample_<em>t</em></button>
     <button class="tab" data-panel="paired-t">Paired <em> t</em></button>
     <button class="tab" data-panel="independent-t">Independent <em>t</em></button>
-    <button class="tab" data-panel="anova">One-way ANOVA</button>
+    <button class="tab" data-panel="anova">One-Way ANOVA</button>
   </nav>
 
   <!-- ============================================================
@@ -208,7 +208,7 @@
        ============================================================ -->
   <section class="panel" id="ztest">
     <div class="panel-header">
-      <h2><em>z</em>-test</h2>
+      <h2><em>z</em>-Test</h2>
       <p class="panel-desc">
         Tests whether a sample mean differs from a hypothesized
         population value <strong>when the population SD (σ) is known</strong>.
@@ -303,7 +303,7 @@
        ============================================================ -->
   <section class="panel" id="onesample-t">
     <div class="panel-header">
-      <h2>Single-sample <em>t</em>-test</h2>
+      <h2>Single-Sample <em>t</em>-test</h2>
       <p class="panel-desc">
         Tests whether a sample mean differs from a hypothesized
         value when the population SD is <em>unknown</em> and must
@@ -494,13 +494,16 @@
        PANEL 6: INDEPENDENT-SAMPLE T-TEST
 
        Two independent groups of possibly different sizes.
+       Uses the pooled-variance (equal-variances-assumed)
+       approach, matching the PSYC 210 curriculum. Welch's
+       correction is intentionally not offered.
 
        Raw mode: two columns of possibly different lengths.
        Summary mode: means, SDs, and ns for each group.
        ============================================================ -->
   <section class="panel" id="independent-t">
     <div class="panel-header">
-      <h2>Independent-samples <em>t</em>-test</h2>
+      <h2>Independent-Samples <em>t</em>-test</h2>
       <p class="panel-desc">
         Compares means of two independent groups when the population 
         SDs are unknown and assumed to be equal. 
@@ -602,7 +605,7 @@
        ============================================================ -->
   <section class="panel" id="anova">
     <div class="panel-header">
-      <h2>One-way Between-Groups ANOVA</h2>
+      <h2>One-Way Between-Groups ANOVA</h2>
       <p class="panel-desc">
         Compares means across three or more independent groups.
         Reports <em>F</em>, <em>p</em>, the effect size η², and 

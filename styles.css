@@ -674,53 +674,6 @@ textarea::placeholder {
   font-variant-numeric: tabular-nums;
 }
 
-/* ============================================================
-   INTERPRETATION CALLOUT
-
-   Plain-language summary of the results. Uses the light
-   KU Blue tint background with a strong KU Blue left border.
-   ============================================================ */
-.interpretation {
-  margin-top: 22px;
-  padding: 18px 22px;
-  background-color: var(--bg-callout);
-  border-left: 4px solid var(--ku-blue);
-  border-radius: 4px;
-}
-
-.interpretation-label {
-  font-family: var(--font-body);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ku-blue);
-  margin-bottom: 8px;
-}
-
-.interpretation p {
-  font-size: 16px;
-  line-height: 1.6;
-  color: var(--text-primary);
-}
-
-.interpretation em {
-  /* Italicized statistical symbols like t, p, F */
-  font-style: italic;
-}
-
-.stat-num {
-  /* Inline numeric values embedded in the interpretation prose */
-  font-family: var(--font-mono);
-  font-size: 0.9em;
-  background-color: var(--bg-input);
-  padding: 1px 6px;
-  border-radius: 3px;
-  color: var(--text-primary);
-  border: 1px solid var(--rule);
-  font-variant-numeric: tabular-nums;
-}
-
 
 /* ============================================================
    FOOTER

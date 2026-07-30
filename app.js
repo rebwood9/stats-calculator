@@ -50,12 +50,6 @@ function formatPValue(p) {
   return p.toFixed(3).replace(/^0/, '');
 }
 
-/* Build the "p = ..." or "p < ..." string for interpretation prose. */
-function pWithEquals(p) {
-  const s = formatPValue(p);
-  return s.startsWith('<') ? s : '= ' + s;
-}
-
 
 /* ============================================================
    SECTION 2: TAB SWITCHING

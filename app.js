@@ -677,9 +677,15 @@ document.getElementById('av-calc').addEventListener('click', function() {
   const sig = result.p < 0.05;
 
   // Build the main results grid
+  // One cell per group mean, labeled by group name.
+  const groupMeanCells = result.groups.map(g =>
+    [`${g.name} mean`, formatNum(g.mean)]
+  );
+
   const cells = [
     ['k (groups)', result.k],
     ['N (total)', result.N],
+    ...groupMeanCells,
     ['SS between', formatNum(result.ssBetween, 2)],
     ['SS within', formatNum(result.ssWithin, 2)],
     ['SS total', formatNum(result.ssTotal, 2)],
@@ -689,8 +695,7 @@ document.getElementById('av-calc').addEventListener('click', function() {
     ['MS within', formatNum(result.msWithin, 2)],
     ['F', formatNum(result.F), sig],
     ['p', formatPValue(result.p), sig],
-    ['η² (eta-squared)', formatNum(result.etaSquared)],
-    ['ω² (omega-squared)', formatNum(result.omegaSquared)]
+    ['η² (eta-squared)', formatNum(result.etaSquared)]
   ];
 
   renderResults('av', cells);

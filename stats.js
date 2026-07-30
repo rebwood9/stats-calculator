@@ -558,8 +558,6 @@ function anovaFromSummary(groups, confidence) {
 
   // Effect sizes
   const etaSquared = ssBetween / ssTotal;
-  const omegaSquared = (ssBetween - dfBetween * msWithin)
-                       / (ssTotal + msWithin);
 
   return {
     k, N, grandMean,

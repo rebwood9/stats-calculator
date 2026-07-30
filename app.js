@@ -699,6 +699,13 @@ document.getElementById('av-calc').addEventListener('click', function() {
   ];
 
   renderResults('av', cells);
+
+  // Tukey HSD post-hoc table — raw mode only (needs the data).
+  if (mode === 'raw') {
+    const groups = readAnovaRawGroups();
+    const pairs = tukeyHSD(groups);
+    renderTukeyTable('av', pairs);
+  }
 });
 
 
@@ -721,4 +728,35 @@ function renderResults(prefix, cells) {
     </div>
   `;
   document.getElementById(prefix + '-results').innerHTML = resultsHTML;
+}
+
+/* Render the Tukey HSD pairwise comparison table, appended below
+   the main ANOVA results grid. One row per group pair. */
+function renderTukeyTable(prefix, pairs) {
+  const rows = pairs.map(pr => `
+    <tr>
+      <td>${pr.pair}</td>
+      <td class="tukey-num">${formatNum(pr.meanDiff)}</td>
+      <td class="tukey-num${pr.significant ? ' significant' : ''}">${formatPValue(pr.p)}</td>
+    </tr>
+  `).join('');
+
+  const tableHTML = `
+    <div class="tukey-block">
+      <h3>Tukey HSD post-hoc comparisons</h3>
+      <table class="tukey-table">
+        <thead>
+          <tr>
+            <th>Comparison</th>
+            <th>Mean difference</th>
+            <th><em>p</em></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+
+  // Append, don't overwrite — the main grid is already there.
+  document.getElementById(prefix + '-results').insertAdjacentHTML('beforeend', tableHTML);
 }

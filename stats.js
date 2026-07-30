@@ -582,3 +582,36 @@ function anova(groupsData, confidence) {
   }));
   return anovaFromSummary(summary, confidence);
 }
+
+/* ============================================================
+   SECTION 10: TUKEY HSD POST-HOC COMPARISONS
+
+   After a significant one-way ANOVA, Tukey's Honestly Significant
+   Difference test identifies WHICH pairs of groups differ, while
+   controlling the family-wise error rate across all comparisons.
+
+   Raw data only: the studentized range calculation needs the
+   underlying observations. jStat.tukeyhsd does the distribution
+   work; we attach names and mean differences for display.
+
+   Input:  groupsData — array of {name?, data: [numbers]}
+   Output: array of { pair, meanDiff, p, significant } objects,
+           one per unique group pair.
+   ============================================================ */
+function tukeyHSD(groupsData) {
+  const dataArrays = groupsData.map(g => g.data);
+  const names = groupsData.map((g, i) => g.name || `Group ${i + 1}`);
+
+  // jStat returns [[i, j], pValue] for each unique pair.
+  const raw = jStat.tukeyhsd(dataArrays);
+
+  return raw.map(([[i, j], p]) => {
+    const meanDiff = mean(dataArrays[i]) - mean(dataArrays[j]);
+    return {
+      pair: `${names[i]} − ${names[j]}`,
+      meanDiff,
+      p,
+      significant: p < 0.05
+    };
+  });
+}

@@ -145,25 +145,33 @@ function zCritical(confidence) {
   return jStat.normal.inv(upperTail, 0, 1);
 }
 
-/* Given a t statistic, its df, the tail, and confidence, return the
-   correct p-value and the critical t to DISPLAY for the hypothesis
-   test. (The CI critical value is computed separately and stays
-   two-tailed.) */
+/* Critical z for a ONE-tailed test at significance level (1 − confidence).
+   Uses upperTail = confidence rather than (1+confidence)/2.
+   R equivalent: qnorm(confidence). */
+function zCriticalOneTailed(confidence) {
+  return jStat.normal.inv(confidence, 0, 1);
+}
+
+/* Given a t statistic, df, tail, and confidence, return the tail-aware
+   p-value and the critical t. tCritMag is the positive magnitude (used
+   for CI margins); tCritSigned is what to display (negative for a
+   lower-tailed test). */
 function tTestPandCrit(t, df, tail, confidence) {
-  let p, tCritDisplay;
+  let p, tCritMag, tCritSigned;
   if (tail === 'upper') {
     p = tPvalueUpper(t, df);
-    tCritDisplay = tCriticalOneTailed(df, confidence);
+    tCritMag = tCriticalOneTailed(df, confidence);
+    tCritSigned = tCritMag;
   } else if (tail === 'lower') {
     p = tPvalueLower(t, df);
-    tCritDisplay = -tCriticalOneTailed(df, confidence);
-    // ^ negative: a lower-tailed test rejects when t is below the
-    //   negative cutoff, so we show the signed critical value.
+    tCritMag = tCriticalOneTailed(df, confidence);
+    tCritSigned = -tCritMag;
   } else {
     p = tPvalueTwoTailed(t, df);
-    tCritDisplay = tCritical(df, confidence);
+    tCritMag = tCritical(df, confidence);
+    tCritSigned = tCritMag;
   }
-  return { p, tCritDisplay };
+  return { p, tCritMag, tCritSigned };
 }
 
 /* ============================================================
@@ -296,27 +304,32 @@ function zTestFromSummary(xbar, mu0, sigma, n, confidence, tail) {
   const se = sigma / Math.sqrt(n);
   const z = (xbar - mu0) / se;
 
-  // p-value depends on the alternative hypothesis direction.
-  let p;
-  if (tail === 'upper')      p = zPvalueUpper(z);
-  else if (tail === 'lower') p = zPvalueLower(z);
-  else                       p = zPvalueTwoTailed(z);
+  // Tail-aware p-value and the matching critical z.
+  let p, zcrit;
+  if (tail === 'upper') {
+    p = zPvalueUpper(z);
+    zcrit = zCriticalOneTailed(confidence);
+  } else if (tail === 'lower') {
+    p = zPvalueLower(z);
+    zcrit = zCriticalOneTailed(confidence);
+  } else {
+    p = zPvalueTwoTailed(z);
+    zcrit = zCritical(confidence);
+  }
 
-  // CI stays two-sided regardless of tail (matches intro-course
-  // convention; the tail choice affects only the p-value).
-  const zcrit = zCritical(confidence);
+  // CI uses the tail-matched critical value (both bounds finite,
+  // matching the textbook convention for one-sided tests).
   const ciLower = xbar - zcrit * se;
   const ciUpper = xbar + zcrit * se;
 
-  // Cohen's d for z-test uses the known population SD as
-  // the standardizer:  d = (xbar - mu0) / sigma
   const cohenD = (xbar - mu0) / sigma;
 
   return {
     xbar, mu0, sigma, n, se, z, p,
+    zCrit: zcrit,
+    tail,
     ciLower, ciUpper,
     cohenD,
-    tail,
     confidence
   };
 }
@@ -343,12 +356,11 @@ function oneSampleTTestFromSummary(xbar, s, n, mu0, confidence, tail) {
   const t = (xbar - mu0) / se;
 
   // Tail-aware p-value and the critical t to display.
-  const { p, tCritDisplay } = tTestPandCrit(t, df, tail, confidence);
+  const { p, tCritMag, tCritSigned } = tTestPandCrit(t, df, tail, confidence);
 
-  // CI stays two-sided: use the two-tailed critical value.
-  const tcrit = tCritical(df, confidence);
-  const ciLower = xbar - tcrit * se;
-  const ciUpper = xbar + tcrit * se;
+  // CI uses the tail-matched critical value.
+  const ciLower = xbar - tCritMag * se;
+  const ciUpper = xbar + tCritMag * se;
 
   // Cohen's d = (xbar - mu0) / s
   const cohenD = (xbar - mu0) / s;
@@ -359,12 +371,10 @@ function oneSampleTTestFromSummary(xbar, s, n, mu0, confidence, tail) {
 
   return {
     xbar, s, n, se, df, t, p,
-    tCrit: tCritDisplay,
+    tCrit: tCritSigned,
     tail,
     ciLower, ciUpper,
     cohenD,
-    dCILower: cohenD - tcrit * dSE,
-    dCIUpper: cohenD + tcrit * dSE,
     confidence
   };
 }
@@ -396,24 +406,21 @@ function pairedTTestFromSummary(meanD, sdD, n, muD0, confidence, tail) {
   const t = (meanD - muD0) / se;
   
   // Tail-aware p-value and the critical t to display.
-  const { p, tCritDisplay } = tTestPandCrit(t, df, tail, confidence);
+  const { p, tCritMag, tCritSigned } = tTestPandCrit(t, df, tail, confidence);
 
-  const tcrit = tCritical(df, confidence);
-  const ciLower = meanD - tcrit * se;
-  const ciUpper = meanD + tcrit * se;
+  // CI uses the tail-matched critical value.
+  const ciLower = meanD - tCritMag * se;
+  const ciUpper = meanD + tCritMag * se;
 
-  // Cohen's d_z = mean_D / SD_D
+  // Cohen's d = mean_D / SD_D  (labeled simply "Cohen's d" in the UI)
   const cohenD = meanD / sdD;
-  const dSE = Math.sqrt(1/n + (cohenD ** 2) / (2 * n));
 
   return {
     meanD, sdD, n, se, df, t, p,
-    tCrit: tCritDisplay,
+    tCrit: tCritSigned,
     tail,
     ciLower, ciUpper,
     cohenD,
-    dCILower: cohenD - tcrit * dSE,
-    dCIUpper: cohenD + tcrit * dSE,
     confidence
   };
 }
@@ -459,27 +466,22 @@ function independentTTestFromSummary(
   const t = meanDiff / se;
   
   // Tail-aware p-value and the critical t to display.
-  const { p, tCritDisplay } = tTestPandCrit(t, df, tail, confidence);
+  const { p, tCritMag, tCritSigned } = tTestPandCrit(t, df, tail, confidence);
 
-  const tcrit = tCritical(df, confidence);
-  const ciLower = meanDiff - tcrit * se;
-  const ciUpper = meanDiff + tcrit * se;
+  const ciLower = meanDiff - tCritMag * se;
+  const ciUpper = meanDiff + tCritMag * se;
 
   // Cohen's d using pooled SD
   const cohenD = meanDiff / sp;
-  const dSE = Math.sqrt((n1 + n2) / (n1 * n2)
-                        + (cohenD ** 2) / (2 * (n1 + n2)));
 
   return {
     xbar1, s1, n1,
     xbar2, s2, n2,
     meanDiff, sp, se, df, t, p,
-    tCrit: tCritDisplay,
+    tCrit: tCritSigned,
     tail,
     ciLower, ciUpper,
     cohenD,
-    dCILower: cohenD - tcrit * dSE,
-    dCIUpper: cohenD + tcrit * dSE,
     confidence
   };
 }

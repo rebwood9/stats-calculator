@@ -400,11 +400,7 @@ document.getElementById('t1-calc').addEventListener('click', function() {
     ['df', result.df],
     ['t crit', formatNum(result.tCrit)],
     [`p (${tailLabel})`, formatPValue(result.p), sig],
-    [`${confPct}% CI for mean`,
-     `[${formatNum(result.ciLower)}, ${formatNum(result.ciUpper)}]`],
-    ["Cohen's d", formatNum(result.cohenD)],
-    [`${confPct}% CI for d`,
-     `[${formatNum(result.dCILower)}, ${formatNum(result.dCIUpper)}]`]
+    ["Cohen's d", formatNum(result.cohenD)]
   ];
 
   renderResults('t1', cells);
@@ -470,11 +466,7 @@ document.getElementById('tp-calc').addEventListener('click', function() {
     ['df', result.df],
     ['t crit', formatNum(result.tCrit)],
     [`p (${tailLabel})`, formatPValue(result.p), sig],
-    [`${confPct}% CI for D̄`,
-     `[${formatNum(result.ciLower)}, ${formatNum(result.ciUpper)}]`],
-    ["Cohen's d_z", formatNum(result.cohenD)],
-    [`${confPct}% CI for d_z`,
-     `[${formatNum(result.dCILower)}, ${formatNum(result.dCIUpper)}]`]
+    ["Cohen's d", formatNum(result.cohenD)]
   ];
 
   renderResults('tp', cells);
@@ -541,11 +533,7 @@ document.getElementById('ti-calc').addEventListener('click', function() {
     ['df', result.df],
     ['t crit', formatNum(result.tCrit)],
     [`p (${tailLabel})`, formatPValue(result.p), sig],
-    [`${confPct}% CI for x̄₁ − x̄₂`,
-     `[${formatNum(result.ciLower)}, ${formatNum(result.ciUpper)}]`],
-    ["Cohen's d", formatNum(result.cohenD)],
-    [`${confPct}% CI for d`,
-     `[${formatNum(result.dCILower)}, ${formatNum(result.dCIUpper)}]`]
+    ["Cohen's d", formatNum(result.cohenD)]
   ];
 
   renderResults('ti', cells);

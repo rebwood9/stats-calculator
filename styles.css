@@ -81,7 +81,7 @@ body {
   -webkit-font-smoothing: antialiased;
   /* ^ Smoother font rendering on Mac. */
 
-  max-width: 1000px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 56px 40px 80px;
 }

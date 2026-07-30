@@ -23,7 +23,7 @@
      1. Read inputs from the form
      2. Validate (show error and stop if invalid)
      3. Call the stats function from stats.js
-     4. Render results into the results div
+     4. Render results into the results div --> 2026-07-30 modified to remove interpretation 
    ============================================================ */
 
 
@@ -193,7 +193,7 @@ document.getElementById('desc-calc').addEventListener('click', function() {
     ['Kurtosis (excess)', formatNum(r.kurtosis)]
   ];
 
-  renderResults('desc', cells, null);
+  renderResults('desc', cells);
 });
 
 
@@ -236,26 +236,7 @@ document.getElementById('corr-calc').addEventListener('click', function() {
      `[${formatNum(r.ciLower)}, ${formatNum(r.ciUpper)}]`]
   ];
 
-  // Interpretation
-  const rMag = Math.abs(r.r);
-  let strengthWord;
-  if (rMag < 0.1) strengthWord = 'a negligible';
-  else if (rMag < 0.3) strengthWord = 'a small';
-  else if (rMag < 0.5) strengthWord = 'a medium';
-  else strengthWord = 'a large';
-
-  const dirWord = r.r > 0 ? 'positive' : 'negative';
-  const sigPhrase = sig
-    ? 'is statistically significant'
-    : 'is not statistically significant';
-
-  const interp = `The correlation between X and Y (<em>r</em> =
-    <span class="stat-num">${formatNum(r.r)}</span>) indicates
-    ${strengthWord} ${dirWord} linear association. The result
-    ${sigPhrase} at α = .05, <em>t</em>(${r.df}) =
-    ${formatNum(r.t)}, <em>p</em> ${pWithEquals(r.p)}.`;
-
-  renderResults('corr', cells, interp);
+  renderResults('corr', cells);
 });
 
 
@@ -311,24 +292,8 @@ document.getElementById('z-calc').addEventListener('click', function() {
      `[${formatNum(result.ciLower)}, ${formatNum(result.ciUpper)}]`],
     ["Cohen's d", formatNum(result.cohenD)]
   ];
-
-  const dMag = Math.abs(result.cohenD);
-  const dWord = dMag < 0.2 ? 'a negligible'
-              : dMag < 0.5 ? 'a small'
-              : dMag < 0.8 ? 'a medium' : 'a large';
-  const sigPhrase = sig
-    ? 'is statistically significant'
-    : 'is not statistically significant';
-
-  const interp = `The sample mean of <span class="stat-num">${formatNum(result.xbar)}</span>
-    differs from the hypothesized value of
-    <span class="stat-num">${formatNum(result.mu0)}</span>.
-    The result ${sigPhrase} at α = .05,
-    <em>z</em> = ${formatNum(result.z)}, <em>p</em> ${pWithEquals(result.p)}.
-    Cohen's <em>d</em> = ${formatNum(result.cohenD)} indicates
-    ${dWord} effect.`;
-
-  renderResults('z', cells, interp);
+  
+  renderResults('z', cells);
 });
 
 
@@ -385,23 +350,7 @@ document.getElementById('t1-calc').addEventListener('click', function() {
      `[${formatNum(result.dCILower)}, ${formatNum(result.dCIUpper)}]`]
   ];
 
-  const dMag = Math.abs(result.cohenD);
-  const dWord = dMag < 0.2 ? 'a negligible'
-              : dMag < 0.5 ? 'a small'
-              : dMag < 0.8 ? 'a medium' : 'a large';
-  const sigPhrase = sig
-    ? 'is statistically significant'
-    : 'is not statistically significant';
-
-  const interp = `The sample mean of <span class="stat-num">${formatNum(result.xbar)}</span>
-    differs from the hypothesized value.
-    The result ${sigPhrase} at α = .05,
-    <em>t</em>(${result.df}) = ${formatNum(result.t)},
-    <em>p</em> ${pWithEquals(result.p)}.
-    Cohen's <em>d</em> = ${formatNum(result.cohenD)} indicates
-    ${dWord} effect.`;
-
-  renderResults('t1', cells, interp);
+  renderResults('t1', cells);
 });
 
 
@@ -465,23 +414,7 @@ document.getElementById('tp-calc').addEventListener('click', function() {
      `[${formatNum(result.dCILower)}, ${formatNum(result.dCIUpper)}]`]
   ];
 
-  const dMag = Math.abs(result.cohenD);
-  const dWord = dMag < 0.2 ? 'a negligible'
-              : dMag < 0.5 ? 'a small'
-              : dMag < 0.8 ? 'a medium' : 'a large';
-  const sigPhrase = sig
-    ? 'is statistically significant'
-    : 'is not statistically significant';
-
-  const interp = `The mean difference of
-    <span class="stat-num">${formatNum(result.meanD)}</span> between
-    paired measurements ${sigPhrase} at α = .05,
-    <em>t</em>(${result.df}) = ${formatNum(result.t)},
-    <em>p</em> ${pWithEquals(result.p)}.
-    Cohen's <em>d<sub>z</sub></em> = ${formatNum(result.cohenD)}
-    indicates ${dWord} effect.`;
-
-  renderResults('tp', cells, interp);
+  renderResults('tp', cells);
 });
 
 
@@ -546,22 +479,7 @@ document.getElementById('ti-calc').addEventListener('click', function() {
      `[${formatNum(result.dCILower)}, ${formatNum(result.dCIUpper)}]`]
   ];
 
-  const dMag = Math.abs(result.cohenD);
-  const dWord = dMag < 0.2 ? 'a negligible'
-              : dMag < 0.5 ? 'a small'
-              : dMag < 0.8 ? 'a medium' : 'a large';
-  const sigPhrase = sig
-    ? 'is statistically significant'
-    : 'is not statistically significant';
-
-  const interp = `The difference between Group 1
-    (<em>M</em> = <span class="stat-num">${formatNum(result.xbar1)}</span>) and
-    Group 2 (<em>M</em> = <span class="stat-num">${formatNum(result.xbar2)}</span>)
-    ${sigPhrase} at α = .05, <em>t</em>(${result.df}) = ${formatNum(result.t)},
-    <em>p</em> ${pWithEquals(result.p)}.
-    Cohen's <em>d</em> = ${formatNum(result.cohenD)} indicates ${dWord} effect.`;
-
-  renderResults('ti', cells, interp);
+  renderResults('ti', cells);
 });
 
 
@@ -718,28 +636,7 @@ document.getElementById('av-calc').addEventListener('click', function() {
     ['ω² (omega-squared)', formatNum(result.omegaSquared)]
   ];
 
-  // Effect size interpretation for eta squared
-  // Conventions: .01 small, .06 medium, .14 large
-  const eta = result.etaSquared;
-  const etaWord = eta < 0.01 ? 'a negligible'
-                : eta < 0.06 ? 'a small'
-                : eta < 0.14 ? 'a medium' : 'a large';
-  const sigPhrase = sig
-    ? 'was statistically significant'
-    : 'was not statistically significant';
-
-  // Also list group means in the interpretation for context
-  const groupSummary = result.groups.map(g =>
-    `${g.name}: <em>M</em> = <span class="stat-num">${formatNum(g.mean)}</span>`
-  ).join(', ');
-
-  const interp = `A one-way ANOVA comparing ${result.k} groups
-    (${groupSummary}) ${sigPhrase} at α = .05,
-    <em>F</em>(${result.dfBetween}, ${result.dfWithin}) = ${formatNum(result.F)},
-    <em>p</em> ${pWithEquals(result.p)}.
-    η² = ${formatNum(result.etaSquared)} indicates ${etaWord} effect.`;
-
-  renderResults('av', cells, interp);
+  renderResults('av', cells);
 });
 
 
@@ -747,9 +644,9 @@ document.getElementById('av-calc').addEventListener('click', function() {
    SECTION 5: RESULT RENDERING HELPERS
    ============================================================ */
 
-/* Render a set of result cells + optional interpretation.
+/* Render a set of result cells.
    cells is an array of [label, value] or [label, value, isSignificant]. */
-function renderResults(prefix, cells, interpretationHTML) {
+function renderResults(prefix, cells) {
   const resultsHTML = `
     <h3>Results</h3>
     <div class="result-grid">
@@ -760,12 +657,6 @@ function renderResults(prefix, cells, interpretationHTML) {
         </div>
       `).join('')}
     </div>
-    ${interpretationHTML ? `
-      <div class="interpretation">
-        <div class="interpretation-label">Interpretation</div>
-        <p>${interpretationHTML}</p>
-      </div>
-    ` : ''}
   `;
   document.getElementById(prefix + '-results').innerHTML = resultsHTML;
 }

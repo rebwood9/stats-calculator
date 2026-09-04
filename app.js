@@ -326,7 +326,7 @@ document.getElementById('z-calc').addEventListener('click', function() {
                   : 'two-tailed';
 
   const cells = [
-    ['̄M', formatNum(result.xbar)],
+    ['M', formatNum(result.xbar)],
     ['μ', formatNum(result.mu0)],
     ['σ', formatNum(result.sigma)],
     ['n', result.n],
@@ -386,7 +386,7 @@ document.getElementById('t1-calc').addEventListener('click', function() {
                   : 'two-tailed';
 
   const cells = [
-    ['̄M', formatNum(result.xbar)],
+    ['M', formatNum(result.xbar)],
     ['s', formatNum(result.s)],
     ['n', result.n],
     ['SE', formatNum(result.se)],

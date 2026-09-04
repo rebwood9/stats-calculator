@@ -561,7 +561,6 @@ textarea::placeholder {
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.1em;
-  /* text-transform: uppercase;
   color: var(--ku-blue);
   margin-bottom: 16px;
   padding-bottom: 12px;

@@ -305,7 +305,7 @@ document.getElementById('corr-calc').addEventListener('click', function() {
 
   const cells = [
     ['r', formatNum(r.r), sig],
-    ['r²', formatNum(r.r2)],
+    ['R²', formatNum(r.r2)],
     ['n', r.n],
     ['t', formatNum(r.t)],
     ['df', r.df],
@@ -491,8 +491,8 @@ document.getElementById('tp-calc').addEventListener('click', function() {
                   : 'two-tailed';
 
   const cells = [
-    ['D̄ (mean diff)', formatNum(result.meanD)],
-    ['s_D', formatNum(result.sdD)],
+    ['M<sub>diff</sub>', formatNum(result.meanD)],
+    ['s<sub>diff</sub>', formatNum(result.sdD)],
     ['n (pairs)', result.n],
     ['SE', formatNum(result.se)],
     ['t', formatNum(result.t), sig],
@@ -553,13 +553,13 @@ document.getElementById('ti-calc').addEventListener('click', function() {
                   : 'two-tailed';
                   
   const cells = [
-    ['x̄₁', formatNum(result.xbar1)],
-    ['x̄₂', formatNum(result.xbar2)],
+    ['M₁', formatNum(result.xbar1)],
+    ['M₂', formatNum(result.xbar2)],
     ['s₁', formatNum(result.s1)],
     ['s₂', formatNum(result.s2)],
     ['n₁', result.n1],
     ['n₂', result.n2],
-    ['x̄₁ − x̄₂', formatNum(result.meanDiff)],
+    ['M₁ − M₂', formatNum(result.meanDiff)],
     ['Pooled SD', formatNum(result.sp)],
     ['SE', formatNum(result.se)],
     ['t', formatNum(result.t), sig],

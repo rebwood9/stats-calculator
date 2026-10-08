@@ -177,6 +177,45 @@ function showError(prefix, message) {
   document.getElementById(prefix + '-results').innerHTML = '';
 }
 
+/* ============================================================
+   SECTION 3c: RESET BUTTONS
+   ============================================================ */
+
+// Snapshot the ANOVA group rows as they are at page load.
+const anovaDefaults = {};
+["av-raw-groups", "av-sum-groups"].forEach((id) => {
+  anovaDefaults[id] = document.getElementById(id).innerHTML;
+});
+
+document.addEventListener("click", function (event) {
+  const btn = event.target.closest(".reset-btn");
+  if (!btn) return;
+
+  const panel = btn.closest(".panel");
+  const prefix = btn.id.replace("-reset", "");
+
+  // ANOVA only: put back the original three group rows.
+  Object.keys(anovaDefaults).forEach((id) => {
+    const container = panel.querySelector("#" + id);
+    if (container) container.innerHTML = anovaDefaults[id];
+  });
+
+  // Restore every field to the value written in the HTML.
+  panel.querySelectorAll("input, textarea").forEach((el) => {
+    if (el.type === "checkbox") {
+      el.checked = el.defaultChecked;
+    } else {
+      el.value = el.defaultValue;
+    }
+  });
+
+  // Return mode and tail toggles to their first (default) button.
+  panel.querySelectorAll(".mode-toggle, .tail-toggle").forEach((toggle) => {
+    toggle.querySelector("button").click();
+  });
+
+  clearOutputs(prefix);
+});
 
 /* ============================================================
    SECTION 4a: DESCRIPTIVE STATISTICS

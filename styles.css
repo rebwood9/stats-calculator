@@ -473,6 +473,40 @@ textarea::placeholder {
      responsiveness. */
 }
 
+/* ============================================================
+   RESET BUTTON
+
+   Secondary action. outlined rather than filled 
+   padding is 11px becasue the 1px border adds the missing pixle, 
+   matching Calculate's 12px
+   ============================================================ */
+.btn-row {
+  display: flex;
+  gap: 10px;
+}
+
+.reset-btn {
+  background-color: var(--bg-panel);
+  color: var(--text-secondary);
+  border: 1px solid var(--rule);
+  padding: 11px 20px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 4px;
+  transition:
+    color 0.15s,
+    transform 0.05s;
+}
+
+.reset-btn:hover {
+  color: var(--text-primary);
+}
+
+.reset-btn:active {
+  transform: translateY(1px);
+}
 
 /* ============================================================
    GROUP ADD/REMOVE BUTTONS (ANOVA)

@@ -567,7 +567,6 @@ function anovaFromSummary(groups, confidence) {
     msBetween, msWithin,
     F, p,
     etaSquared,
-    omegaSquared,
     confidence
   };
 }

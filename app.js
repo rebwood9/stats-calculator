@@ -433,6 +433,10 @@ document.getElementById('t1-calc').addEventListener('click', function() {
     ['df', result.df],
     ['t crit', formatNum(result.tCrit)],
     [`p (${tailLabel})`, formatPValue(result.p), sig],
+    [
+      `${confPct}% CI for mean`,
+      `[${formatNum(result.cilower)}, ${formatNum(result.ciUpper)}]`,
+    ],
     ["Cohen's d", formatNum(result.cohenD)]
   ];
 
@@ -499,6 +503,10 @@ document.getElementById('tp-calc').addEventListener('click', function() {
     ['df', result.df],
     ['t crit', formatNum(result.tCrit)],
     [`p (${tailLabel})`, formatPValue(result.p), sig],
+    [
+      `${confPct}% CI for M<sub>diff</sub>`,
+      `[${formatNum(result.ciLower)}, ${formatNum(result.ciUpper)}]`,
+    ],
     ["Cohen's d", formatNum(result.cohenD)]
   ];
 
@@ -566,6 +574,10 @@ document.getElementById('ti-calc').addEventListener('click', function() {
     ['df', result.df],
     ['t crit', formatNum(result.tCrit)],
     [`p (${tailLabel})`, formatPValue(result.p), sig],
+    [
+      `${confPct}% CI for M₁ − M₂`,
+      `[${formatNum(result.ciLower)}, ${formatNum(result.ciUpper)}]`,
+    ],
     ["Cohen's d", formatNum(result.cohenD)]
   ];
 

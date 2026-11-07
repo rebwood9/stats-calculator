@@ -43,6 +43,7 @@
     <button class="tab active" data-panel="descriptives">Descriptives</button>
     <button class="tab" data-panel="correlation">Correlation</button>
     <button class="tab" data-panel="ztest"><em>z</em>-Test</button>
+    <button class="tab" data-panel="cohens-d">Cohen's <em>d</em></button>
     <button class="tab" data-panel="onesample-t">Single-Sample  <em>t</em></button>
     <button class="tab" data-panel="paired-t">Paired  <em>t</em></button>
     <button class="tab" data-panel="independent-t">Independent  <em>t</em></button>
@@ -304,9 +305,88 @@
     <div class="results" id="z-results"></div>
   </section>
 
+<!-- ============================================================
+       PANEL 4: Cohen's d
 
+       A panel for students to check thier calculations of Cohen's d.
+       Cohen's d can be checked for both a sample and population. 
+       The Defalult is for summary statistics since the other panels 
+       calculate Cohen's d from summary statistics.
+       ============================================================ -->
+  <section class="panel" id="cohens-d">
+    <div class="panel-header">
+      <h2>Cohen's <em>d</em></h2>
+      <p class="panel-desc">
+        Computes the standardized difference between a sample mean and a
+        population mean.
+      </p>
+    </div>
+
+    <div class="mode-toggle" id="cd-mode">
+      <button class="active" data-mode="pop">Population (σ)</button>
+      <button data-mode="sample">Sample (<em>s</em>)</button>
+    </div>
+
+    <!-- POPULATION: σ known -->
+    <div class="input-section" id="cd-pop">
+      <div class="field-row">
+        <div class="field">
+          <label for="cd-mean-pop">Sample mean (<em>M</em>)</label>
+          <input type="number" id="cd-mean-pop" step="any" placeholder="e.g. 105" />
+        </div>
+        <div class="field">
+          <label for="cd-mu-pop">
+            μ <span class="hint">population mean</span>
+          </label>
+          <input type="number" id="cd-mu-pop" step="any" placeholder="e.g. 100" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="cd-sd-pop">
+            σ <span class="hint">population SD</span>
+          </label>
+          <input type="number" id="cd-sd-pop" step="any" placeholder="e.g. 15" />
+        </div>
+        <div></div>
+      </div>
+    </div>
+
+    <!-- SAMPLE: s estimated -->
+    <div class="input-section" id="cd-sample" style="display: none">
+      <div class="field-row">
+        <div class="field">
+          <label for="cd-mean-sample">Sample mean (<em>M</em>)</label>
+          <input type="number" id="cd-mean-sample" step="any" placeholder="e.g. 72.9" />
+        </div>
+        <div class="field">
+          <label for="cd-mu-sample">
+            μ <span class="hint">population mean</span>
+          </label>
+          <input type="number" id="cd-mu-sample" step="any" placeholder="e.g. 70" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="cd-sd-sample">
+            <em>s</em> <span class="hint">sample SD (n−1 denominator)</span>
+          </label>
+          <input type="number" id="cd-sd-sample" step="any" placeholder="e.g. 3.73" />
+        </div>
+        <div></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="calc-btn" id="cd-calc">Calculate</button>
+      <button type="button" class="reset-btn" id="cd-reset">Reset</button>
+    </div>
+
+    <p class="error" id="cd-error"></p>
+    <div class="results" id="cd-results"></div>
+  </section>
   <!-- ============================================================
-       PANEL 4: SINGLE-SAMPLE T-TEST
+       PANEL 5: SINGLE-SAMPLE T-TEST
 
        This is the one we prototyped previously. Both modes
        supported. Raw is the default since it's more educational
@@ -391,9 +471,8 @@
     <div class="results" id="t1-results"></div>
   </section>
 
-
   <!-- ============================================================
-       PANEL 5: PAIRED-SAMPLE T-TEST
+       PANEL 6: PAIRED-SAMPLE T-TEST
 
        Two paired columns of the same length (before/after or
        matched pairs). The calculation just runs a one-sample
@@ -514,7 +593,7 @@
 
 
   <!-- ============================================================
-       PANEL 6: INDEPENDENT-SAMPLE T-TEST
+       PANEL 7: INDEPENDENT-SAMPLE T-TEST
 
        Two independent groups of possibly different sizes.
        Uses the pooled-variance (equal-variances-assumed)
@@ -619,7 +698,7 @@
 
 
   <!-- ============================================================
-       PANEL 7: ONE-WAY BETWEEN-GROUPS ANOVA
+       PANEL 8: ONE-WAY BETWEEN-GROUPS ANOVA
 
        Variable number of groups. This is the trickiest
        structurally because we don't know in advance how many

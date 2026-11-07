@@ -802,15 +802,6 @@ function renderTukeyTable(prefix, pairs, confidence) {
   `,
     )
     .join("");
-  
-        <thead>
-          <tr>
-            <th>Comparison</th>
-            <th>Mean difference</th>
-            <th>${confPct}% CI</th>
-            <th><em>p</em></th>
-          </tr>
-        </thead>
 
   const tableHTML = `
     <div class="tukey-block">
@@ -820,6 +811,7 @@ function renderTukeyTable(prefix, pairs, confidence) {
           <tr>
             <th>Comparison</th>
             <th>Mean difference</th>
+            <th>${confPct}% CI</th>
             <th><em>p</em></th>
           </tr>
         </thead>
@@ -829,5 +821,7 @@ function renderTukeyTable(prefix, pairs, confidence) {
   `;
 
   // Append, don't overwrite — the main grid is already there.
-  document.getElementById(prefix + '-results').insertAdjacentHTML('beforeend', tableHTML);
+  document
+    .getElementById(prefix + "-results")
+    .insertAdjacentHTML("beforeend", tableHTML);
 }

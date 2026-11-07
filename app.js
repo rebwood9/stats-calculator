@@ -91,13 +91,12 @@ document.getElementById('tabs').addEventListener('click', function(event) {
 function wireTailToggle(toggleId) {
   const toggle = document.getElementById(toggleId);
   if (!toggle) return;
-  toggle.addEventListener('click', function(event) {
-    const btn = event.target.closest('button');
+  toggle.addEventListener("click", function (event) {
+    const btn = event.target.closest("button");
     if (!btn) return;
-    toggle.querySelectorAll("button").forEach((b) => {
-      const section = document.getElementById(prefix + "-" + b.dataset.mode);
-      section.style.display = b === btn ? "block" : "none";
-    });
+    toggle.querySelectorAll("button").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+  });
 }
 
 /* Read the currently selected tail ('two', 'upper', or 'lower')
@@ -108,7 +107,7 @@ function getTail(toggleId) {
 }
 
 // Wire all tail toggles (z-test and the three t-tests).
-['z-tail', 'cd-tail', 't1-tail', 'tp-tail', 'ti-tail'].forEach(wireTailToggle);
+['z-tail', 't1-tail', 'tp-tail', 'ti-tail'].forEach(wireTailToggle);
 
 /* ============================================================
    SECTION 3b: MODE TOGGLES (Raw vs Summary)
@@ -132,9 +131,11 @@ function wireModeToggle(prefix) {
     const btn = event.target.closest('button');
     if (!btn) return;
 
-    // Mark this button as active, others as inactive
-    toggle.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+    // Show the section matching the clicked button; hide the others
+    toggle.querySelectorAll("button").forEach((b) => {
+      const section = document.getElementById(prefix + "-" + b.dataset.mode);
+      section.style.display = b === btn ? "block" : "none";
+    });
 
     // Show/hide the corresponding input sections
     const mode = btn.dataset.mode;
@@ -154,7 +155,7 @@ function wireModeToggle(prefix) {
 }
 
 // Wire up every calculator's mode toggle at once
-['z', 't1', 'tp', 'ti', 'av'].forEach(wireModeToggle);
+['z', 'cd', 't1', 'tp', 'ti', 'av'].forEach(wireModeToggle);
 
 
 /* Get current mode ('raw' or 'summary') for a calculator. */
@@ -453,7 +454,7 @@ document.getElementById('t1-calc').addEventListener('click', function() {
     [`p (${tailLabel})`, formatPValue(result.p), sig],
     [
       `${confPct}% CI for mean`,
-      `[${formatNum(result.cilower)}, ${formatNum(result.ciUpper)}]`,
+      `[${formatNum(result.ciLower)}, ${formatNum(result.ciUpper)}]`,
     ],
     ["Cohen's d", formatNum(result.cohenD)]
   ];
@@ -809,7 +810,10 @@ function renderTukeyTable(prefix, pairs, confidence) {
   `,
     )
     .join("");
-  // ...header row gains: <th>${confPct}% CI</th> between Mean difference and p
+  <th>Comparison</th>
+  <th>Mean difference</th>
+  <th>${confPct}% CI</th>
+  <th><em>p</em></th>
 
   const tableHTML = `
     <div class="tukey-block">

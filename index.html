@@ -459,6 +459,7 @@
         <div class="field">
           <label for="tp-mean-d">
             Mean of differences (<em>M<sub>diff</sub></em>)
+            <span class="hint">Measurement 2 - Measurement 1</span>
           </label>
           <input type="number" id="tp-mean-d" step="any" placeholder="e.g. 2.4">
         </div>
@@ -491,7 +492,10 @@
     </div>
     
     <div class="field">
-      <label>Alternative hypothesis</label>
+      <label>
+        Alternative hypothesis
+        <span class="hint">direction refers to Measurement 2 - Measurement 1</span>
+      </label>
       <div class="tail-toggle" id="tp-tail">
         <button class="active" data-tail="two">Two-tailed (≠)</button>
         <button data-tail="upper">One-tailed (&gt;)</button>
@@ -593,7 +597,10 @@
     </div>
     
     <div class="field">
-      <label>Alternative hypothesis</label>
+      <label>
+        Alternative hypothesis
+        <span class="hint">direction refers to Group 1 - Group 2</span>
+      </label>
       <div class="tail-toggle" id="ti-tail">
         <button class="active" data-tail="two">Two-tailed (≠)</button>
         <button data-tail="upper">One-tailed (&gt;)</button>

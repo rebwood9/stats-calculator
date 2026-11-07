@@ -131,23 +131,15 @@ function wireModeToggle(prefix) {
     const btn = event.target.closest('button');
     if (!btn) return;
 
+     // Mark this button as active, others as inactive
+    toggle.querySelectorAll("button").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+
     // Show the section matching the clicked button; hide the others
     toggle.querySelectorAll("button").forEach((b) => {
       const section = document.getElementById(prefix + "-" + b.dataset.mode);
       section.style.display = b === btn ? "block" : "none";
     });
-
-    // Show/hide the corresponding input sections
-    const mode = btn.dataset.mode;
-    const rawSection = document.getElementById(prefix + '-raw');
-    const sumSection = document.getElementById(prefix + '-summary');
-    if (mode === 'raw') {
-      rawSection.style.display = 'block';
-      sumSection.style.display = 'none';
-    } else {
-      rawSection.style.display = 'none';
-      sumSection.style.display = 'block';
-    }
 
     // Clear previous results/errors when switching modes
     clearOutputs(prefix);
@@ -810,10 +802,15 @@ function renderTukeyTable(prefix, pairs, confidence) {
   `,
     )
     .join("");
-  <th>Comparison</th>
-  <th>Mean difference</th>
-  <th>${confPct}% CI</th>
-  <th><em>p</em></th>
+  
+        <thead>
+          <tr>
+            <th>Comparison</th>
+            <th>Mean difference</th>
+            <th>${confPct}% CI</th>
+            <th><em>p</em></th>
+          </tr>
+        </thead>
 
   const tableHTML = `
     <div class="tukey-block">

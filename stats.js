@@ -340,9 +340,18 @@ function zTest(data, mu0, sigma, confidence, tail) {
   return zTestFromSummary(xbar, mu0, sigma, n, confidence, tail);
 }
 
+/* ============================================================
+   SECTION 6: COHEN'S D (STANDALONE)
+
+   d = (M − μ) / SD, where SD is σ (population) or s (sample).
+   The formula is the same either way; the UI labels the source.
+   ============================================================ */
+function cohensD(m, mu, sd) {
+  return (m - mu) / sd;
+}
 
 /* ============================================================
-   SECTION 6: ONE-SAMPLE T-TEST
+   SECTION 7: ONE-SAMPLE T-TEST
 
    Tests H0: mu = mu0 when population SD is unknown.
    ============================================================ */
@@ -388,7 +397,7 @@ function oneSampleTTest(data, mu0, confidence, tail) {
 
 
 /* ============================================================
-   SECTION 7: PAIRED-SAMPLE T-TEST
+   SECTION 8: PAIRED-SAMPLE T-TEST
 
    Tests H0: mu_D = mu_D0 (usually 0) where D = X2 - X1.
 
@@ -440,7 +449,7 @@ function pairedTTest(x1, x2, muD0, confidence, tail) {
 
 
 /* ============================================================
-   SECTION 8: INDEPENDENT-SAMPLE T-TEST (POOLED)
+   SECTION 9: INDEPENDENT-SAMPLE T-TEST (POOLED)
 
    PSYC 210 uses the POOLED VARIANCE approach.
 
@@ -501,7 +510,7 @@ function independentTTest(x1, x2, confidence, tail) {
 
 
 /* ============================================================
-   SECTION 9: ONE-WAY BETWEEN-GROUPS ANOVA
+   SECTION 10: ONE-WAY BETWEEN-GROUPS ANOVA
 
    Compares means across k independent groups.
 
@@ -584,7 +593,7 @@ function anova(groupsData, confidence) {
 }
 
 /* ============================================================
-   SECTION 10: TUKEY HSD POST-HOC COMPARISONS
+   SECTION 11: TUKEY HSD POST-HOC COMPARISONS
 
    After a significant one-way ANOVA, Tukey's Honestly Significant
    Difference test identifies WHICH pairs of groups differ, while

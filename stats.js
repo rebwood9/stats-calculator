@@ -597,20 +597,34 @@ function anova(groupsData, confidence) {
    Output: array of { pair, meanDiff, p, significant } objects,
            one per unique group pair.
    ============================================================ */
-function tukeyHSD(groupsData) {
-  const dataArrays = groupsData.map(g => g.data);
+function tukeyHSD(groupsData, confidence) {
+  if (confidence === undefined) confidence = 0.95;
+
+  const dataArrays = groupsData.map((g) => g.data);
   const names = groupsData.map((g, i) => g.name || `Group ${i + 1}`);
 
-  // jStat returns [[i, j], pValue] for each unique pair.
+  // MS within and the critical studentized range value
+  const k = dataArrays.length;
+  const N = dataArrays.reduce((sum, d) => sum + d.length, 0);
+  const ssWithin = dataArrays.reduce((sum, d) => sum + sumOfSquares(d), 0);
+  const msWithin = ssWithin / (N - k);
+  const qCrit = jStat.tukey.inv(confidence, k, N - k);
+
   const raw = jStat.tukeyhsd(dataArrays);
 
   return raw.map(([[i, j], p]) => {
     const meanDiff = mean(dataArrays[i]) - mean(dataArrays[j]);
+    const ni = dataArrays[i].length;
+    const nj = dataArrays[j].length;
+    const margin =
+      (qCrit / Math.SQRT2) * Math.sqrt(msWithin * (1 / ni + 1 / nj));
     return {
       pair: `${names[i]} − ${names[j]}`,
       meanDiff,
+      ciLower: meanDiff - margin,
+      ciUpper: meanDiff + margin,
       p,
-      significant: p < 0.05
+      significant: p < 0.05,
     };
   });
 }

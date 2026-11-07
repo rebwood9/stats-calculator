@@ -390,7 +390,7 @@ function oneSampleTTest(data, mu0, confidence, tail) {
 /* ============================================================
    SECTION 7: PAIRED-SAMPLE T-TEST
 
-   Tests H0: mu_D = mu_D0 (usually 0) where D = X1 - X2.
+   Tests H0: mu_D = mu_D0 (usually 0) where D = X2 - X1.
 
    Uses Cohen's d_z:  d = mean_D / SD_D
    This is what PSYC 210 uses.
@@ -430,7 +430,8 @@ function pairedTTest(x1, x2, muD0, confidence, tail) {
     throw new Error('Paired data must have equal lengths');
   }
   // Compute difference scores
-  const diffs = x1.map((v, i) => v - x2[i]);
+  // Difference scores: Measurement 2 − Measurement 1 (textbook convention)
+  const diffs = x2.map((v, i) => v - x1[i]);
   const meanD = mean(diffs);
   const sdD = sampleSD(diffs);
   const n = diffs.length;

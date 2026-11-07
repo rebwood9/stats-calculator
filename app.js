@@ -748,8 +748,8 @@ document.getElementById('av-calc').addEventListener('click', function() {
   // Tukey HSD post-hoc table — raw mode only (needs the data).
   if (mode === 'raw') {
     const groups = readAnovaRawGroups();
-    const pairs = tukeyHSD(groups);
-    renderTukeyTable('av', pairs);
+    const pairs = tukeyHSD(groups, confidence);
+    renderTukeyTable('av', pairs, confidence);
   }
 });
 
@@ -777,14 +777,21 @@ function renderResults(prefix, cells) {
 
 /* Render the Tukey HSD pairwise comparison table, appended below
    the main ANOVA results grid. One row per group pair. */
-function renderTukeyTable(prefix, pairs) {
-  const rows = pairs.map(pr => `
+function renderTukeyTable(prefix, pairs, confidence) {
+  const confPct = (confidence * 100).toFixed(0);
+  const rows = pairs
+    .map(
+      (pr) => `
     <tr>
       <td>${pr.pair}</td>
       <td class="tukey-num">${formatNum(pr.meanDiff)}</td>
-      <td class="tukey-num${pr.significant ? ' significant' : ''}">${formatPValue(pr.p)}</td>
+      <td class="tukey-num">[${formatNum(pr.ciLower)}, ${formatNum(pr.ciUpper)}]</td>
+      <td class="tukey-num${pr.significant ? " significant" : ""}">${formatPValue(pr.p)}</td>
     </tr>
-  `).join('');
+  `,
+    )
+    .join("");
+  // ...header row gains: <th>${confPct}% CI</th> between Mean difference and p
 
   const tableHTML = `
     <div class="tukey-block">

@@ -8,22 +8,28 @@
 
      Section 1: Formatting helpers (numbers, p-values)
      Section 2: Tab switching
-     Section 3: Mode toggles (raw vs summary)
+     Section 3: Toggles and shared helpers
+                3a. Tail toggles (two-tailed / one-tailed > / <)
+                3b. Mode toggles (raw vs summary; pop vs sample for
+                    Cohen's d) and output helpers
+                3c. Reset buttons
      Section 4: Individual calculator handlers, one per tab
                 4a. Descriptives
                 4b. Correlation
                 4c. z-test
-                4d. One-sample t
-                4e. Paired-sample t
-                4f. Independent-sample t
-                4g. ANOVA (with dynamic group add/remove)
-     Section 5: Reusable rendering helpers
+                4d. Cohen's d (standalone)
+                4e. One-sample t
+                4f. Paired-sample t
+                4g. Independent-sample t
+                4h. ANOVA (with dynamic group add/remove and Tukey HSD)
+     Section 5: Reusable rendering helpers (results grid, Tukey table)
 
    Every calculator follows the same 4-step pattern:
      1. Read inputs from the form
      2. Validate (show error and stop if invalid)
      3. Call the stats function from stats.js
-     4. Render results into the results div --> 2026-07-30 modified to remove interpretation 
+     4. Render results into the results div
+        (interpretation paragraphs were removed on 2026-07-30)
    ============================================================ */
 
 
@@ -56,7 +62,7 @@ function formatPValue(p) {
 
    Attach ONE listener to the parent nav element and check which
    button was clicked. This "event delegation" pattern is cleaner
-   than attaching seven separate listeners.
+   than attaching eight separate listeners.
    ============================================================ */
 
 document.getElementById('tabs').addEventListener('click', function(event) {
@@ -110,15 +116,17 @@ function getTail(toggleId) {
 ['z-tail', 't1-tail', 'tp-tail', 'ti-tail'].forEach(wireTailToggle);
 
 /* ============================================================
-   SECTION 3b: MODE TOGGLES (Raw vs Summary)
+   SECTION 3b: MODE TOGGLES
 
    Every calculator that has a mode toggle uses the same
    naming convention:
      - Toggle container:   {prefix}-mode
-     - Raw input section:  {prefix}-raw
-     - Summary section:    {prefix}-summary
+     - Input sections:     {prefix}-{data-mode of each button}
 
-   So we can wire them all up with a single helper.
+   Most calculators use raw/summary ({prefix}-raw and
+   {prefix}-summary). Cohen's d uses pop/sample (cd-pop and
+   cd-sample). The helper reads each button's data-mode, so
+   one function wires up both patterns.
    ============================================================ */
 
 function wireModeToggle(prefix) {
@@ -150,7 +158,8 @@ function wireModeToggle(prefix) {
 ['z', 'cd', 't1', 'tp', 'ti', 'av'].forEach(wireModeToggle);
 
 
-/* Get current mode ('raw' or 'summary') for a calculator. */
+/* Get current mode for a calculator: 'raw' or 'summary' for most,
+   'pop' or 'sample' for Cohen's d. Defaults to 'raw'. */
 function getMode(prefix) {
   const activeBtn = document
     .querySelector(`#${prefix}-mode button.active`);
@@ -173,6 +182,12 @@ function showError(prefix, message) {
 
 /* ============================================================
    SECTION 3c: RESET BUTTONS
+
+   One delegated listener handles every Reset button. Each button's
+   id is {prefix}-reset, so stripping "-reset" gives the prefix.
+   Reset restores inputs to their HTML defaults, returns toggles to
+   their first button, puts back ANOVA's three starting group rows,
+   and clears results and errors.
    ============================================================ */
 
 // Snapshot the ANOVA group rows as they are at page load.
@@ -600,8 +615,9 @@ document.getElementById('ti-calc').addEventListener('click', function() {
    SECTION 4h: ONE-WAY BETWEEN-GROUPS ANOVA
 
    This one is more involved because we support a dynamic number
-   of groups. First we wire up the add/remove buttons, then the
-   calculate handler.
+   of groups (2 to 10). First we wire up the add/remove buttons,
+   then the calculate handler. Raw mode also renders a Tukey HSD
+   table below the main results.
    ============================================================ */
 
 /* Renumber all group labels after adding/removing.
@@ -770,7 +786,9 @@ document.getElementById('av-calc').addEventListener('click', function() {
    ============================================================ */
 
 /* Render a set of result cells.
-   cells is an array of [label, value] or [label, value, isSignificant]. */
+   cells is an array of [label, value] or [label, value, isSignificant].
+   isSignificant adds the "significant" class, which styles.css
+   intentionally leaves looking like normal text. */
 function renderResults(prefix, cells) {
   const resultsHTML = `
     <h3>Results</h3>
@@ -787,7 +805,8 @@ function renderResults(prefix, cells) {
 }
 
 /* Render the Tukey HSD pairwise comparison table, appended below
-   the main ANOVA results grid. One row per group pair. */
+   the main ANOVA results grid. One row per group pair, with the
+   mean difference, its CI at the chosen confidence level, and p. */
 function renderTukeyTable(prefix, pairs, confidence) {
   const confPct = (confidence * 100).toFixed(0);
   const rows = pairs
@@ -821,7 +840,5 @@ function renderTukeyTable(prefix, pairs, confidence) {
   `;
 
   // Append, don't overwrite — the main grid is already there.
-  document
-    .getElementById(prefix + "-results")
-    .insertAdjacentHTML("beforeend", tableHTML);
+  document.getElementById(prefix + '-results').insertAdjacentHTML('beforeend', tableHTML);
 }

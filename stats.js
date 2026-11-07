@@ -374,10 +374,6 @@ function oneSampleTTestFromSummary(xbar, s, n, mu0, confidence, tail) {
   // Cohen's d = (xbar - mu0) / s
   const cohenD = (xbar - mu0) / s;
 
-  // Approximate CI for d using the Hedges & Olkin SE:
-  //   SE(d) = sqrt(1/n + d^2 / (2n))
-  const dSE = Math.sqrt(1/n + (cohenD ** 2) / (2 * n));
-
   return {
     xbar, s, n, se, df, t, p,
     tCrit: tCritSigned,
@@ -399,10 +395,11 @@ function oneSampleTTest(data, mu0, confidence, tail) {
 /* ============================================================
    SECTION 8: PAIRED-SAMPLE T-TEST
 
-   Tests H0: mu_D = mu_D0 (usually 0) where D = X2 - X1.
+   Tests H0: mu_D = mu_D0 (usually 0) where D = X2 - X1
+   (Measurement 2 minus Measurement 1).
 
    Uses Cohen's d_z:  d = mean_D / SD_D
-   This is what PSYC 210 uses.
+   This is what PSYC 210 uses. The UI labels it "Cohen's d".
    ============================================================ */
 
 function pairedTTestFromSummary(meanD, sdD, n, muD0, confidence, tail) {
@@ -438,7 +435,6 @@ function pairedTTest(x1, x2, muD0, confidence, tail) {
   if (x1.length !== x2.length) {
     throw new Error('Paired data must have equal lengths');
   }
-  // Compute difference scores
   // Difference scores: Measurement 2 − Measurement 1 (textbook convention)
   const diffs = x2.map((v, i) => v - x1[i]);
   const meanD = mean(diffs);
@@ -514,9 +510,7 @@ function independentTTest(x1, x2, confidence, tail) {
 
    Compares means across k independent groups.
 
-   PSYC 210 uses eta-squared (η²) as the primary effect size.
-   We also compute omega-squared (ω²) for reference but display
-   it as secondary.
+   PSYC 210 uses eta-squared (η²) as the effect size.
 
    Grand mean = weighted average of group means.
    SS_between = sum over groups of n_g * (mean_g - grand_mean)^2
@@ -531,8 +525,9 @@ function independentTTest(x1, x2, confidence, tail) {
 
    F          = MS_between / MS_within
    eta^2      = SS_between / SS_total
-   omega^2    = (SS_between - df_between * MS_within)
-                / (SS_total + MS_within)
+
+   The confidence argument is passed through unused here; the
+   Tukey HSD step uses it for its CIs.
    ============================================================ */
 
 function anovaFromSummary(groups, confidence) {
@@ -595,17 +590,22 @@ function anova(groupsData, confidence) {
 /* ============================================================
    SECTION 11: TUKEY HSD POST-HOC COMPARISONS
 
-   After a significant one-way ANOVA, Tukey's Honestly Significant
-   Difference test identifies WHICH pairs of groups differ, while
-   controlling the family-wise error rate across all comparisons.
+   Tukey's Honestly Significant Difference test identifies WHICH
+   pairs of groups differ, while controlling the family-wise error
+   rate across all comparisons. The app shows it after every raw-data
+   ANOVA, whether or not the omnibus F is significant.
 
-   Raw data only: the studentized range calculation needs the
-   underlying observations. jStat.tukeyhsd does the distribution
-   work; we attach names and mean differences for display.
+   Raw data only: this implementation takes the underlying
+   observations. jStat.tukeyhsd supplies the p-values; we compute
+   MS within and the critical studentized range value (jStat.tukey.inv)
+   for the CIs, and attach names and mean differences for display.
+
+   CI margin:  (q_crit / sqrt(2)) * sqrt(MS_within * (1/n_i + 1/n_j))
 
    Input:  groupsData — array of {name?, data: [numbers]}
-   Output: array of { pair, meanDiff, p, significant } objects,
-           one per unique group pair.
+           confidence — CI level (default 0.95)
+   Output: array of { pair, meanDiff, ciLower, ciUpper, p, significant }
+           objects, one per unique group pair. significant uses p < .05.
    ============================================================ */
 function tukeyHSD(groupsData, confidence) {
   if (confidence === undefined) confidence = 0.95;

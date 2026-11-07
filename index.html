@@ -1,8 +1,8 @@
-  <!-- ============================================================
+<!-- ============================================================
        PSYC 210 Statistical Calculators — full structure.
 
-       This file contains the HTML for all seven calculators as
-       separate tabs. Only one panel is visible at a time 
+       This file contains the HTML for all eight calculators as
+       separate tabs. Only one panel is visible at a time.
        ============================================================ -->
 
 <!DOCTYPE html>
@@ -56,9 +56,11 @@
        No mode toggle here. Descriptives ARE summary stats,
        so summary-mode wouldn't add anything.
 
-       Inputs: one column of numbers.
-       Outputs: n, mean, median, mode, variance (s²), SD (both
-       n and n-1 denominators), min, max, range.
+       Inputs: one column of numbers, plus checkboxes choosing
+       which statistics to show (none checked by default).
+       Outputs (whichever are checked): n, mean, median, mode,
+       SD and variance (both n−1 and n denominators), min, max,
+       range.
        ============================================================ -->
   <section class="panel active" id="descriptives">
     <div class="panel-header">
@@ -141,9 +143,10 @@
        rather than one textarea with X,Y pairs, because it's
        easier to paste data column-by-column from a spreadsheet.
 
-       Inputs: two equal-length columns.
-       Outputs: r, r², n, t for testing H0: ρ = 0, df, p,
-       95% CI for r (via Fisher's z transformation).
+       Inputs: two equal-length columns, confidence level.
+       Outputs: r, R², n, t for testing H0: ρ = 0, df, p
+       (two-tailed), CI for r at the chosen confidence level
+       (via Fisher's z transformation).
        ============================================================ -->
   <section class="panel" id="correlation">
     <div class="panel-header">
@@ -209,10 +212,11 @@
        I still include a raw-data mode for completeness, but
        summary is the default (see the mode-toggle order).
 
-       Inputs: x̄, μ, σ, n  (summary mode)
+       Inputs: M, μ, σ, n  (summary mode)
                data, μ, σ    (raw mode)
-       Outputs: z, p, CI for mean, Cohen's d (uses σ as
-       the standardizer).
+               confidence level and tail direction (both modes)
+       Outputs: M, μ, σ, n, SE, z, p (tail-aware), CI for mean,
+       Cohen's d (uses σ as the standardizer).
        ============================================================ -->
   <section class="panel" id="ztest">
     <div class="panel-header">
@@ -308,10 +312,11 @@
 <!-- ============================================================
        PANEL 4: Cohen's d
 
-       A panel for students to check thier calculations of Cohen's d.
-       Cohen's d can be checked for both a sample and population. 
-       The Defalult is for summary statistics since the other panels 
-       calculate Cohen's d from summary statistics.
+       A panel for students to check their calculations of Cohen's d.
+       Summary statistics only: d = (M − μ) / SD.
+       The mode toggle chooses the SD: Population (σ) or Sample (s).
+       Population is the default, matching the order taught in
+       the course.
        ============================================================ -->
   <section class="panel" id="cohens-d">
     <div class="panel-header">
@@ -388,9 +393,10 @@
   <!-- ============================================================
        PANEL 5: SINGLE-SAMPLE T-TEST
 
-       This is the one we prototyped previously. Both modes
-       supported. Raw is the default since it's more educational
-       (students see the full computation from data).
+       Both modes supported. Raw is the default since it's more
+       educational (students see the full computation from data).
+       Includes a tail toggle. Outputs: M, s, n, SE, t, df, t crit,
+       p (tail-aware), CI for mean, Cohen's d.
        ============================================================ -->
   <section class="panel" id="onesample-t">
     <div class="panel-header">
@@ -479,7 +485,8 @@
        t-test on the difference scores, but we present it as
        its own calculator for teaching clarity.
 
-       Raw mode: two columns.
+       Raw mode: two columns. Differences are computed as
+       Measurement 2 − Measurement 1.
        Summary mode: mean of differences, SD of differences, n.
 
        Note: Summary-stat problems for paired t are usually
@@ -602,6 +609,7 @@
 
        Raw mode: two columns of possibly different lengths.
        Summary mode: means, SDs, and ns for each group.
+       Differences and tail direction refer to Group 1 − Group 2.
        ============================================================ -->
   <section class="panel" id="independent-t">
     <div class="panel-header">
@@ -711,6 +719,9 @@
 
        For summary mode: same idea, but with rows of
        (name, mean, SD, n) fields.
+
+       Groups can range from 2 to 10. Tukey HSD post-hoc
+       comparisons appear in raw mode only.
        ============================================================ -->
   <section class="panel" id="anova">
     <div class="panel-header">

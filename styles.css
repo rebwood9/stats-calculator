@@ -32,8 +32,8 @@
 
   /* Surfaces */
   --bg-page: #ffffff;          /* main page background */
-  --bg-panel: #f8fafc;         /* subtle tint for result grids */
-  --bg-callout: #f0f5fc;       /* light KU Blue tint for interpretations */
+  --bg-panel: #f8fafc;         /* subtle tint for toggles and the Reset button */
+  --bg-callout: #f0f5fc;       /* light KU Blue tint; currently unused (interpretations removed) */
   --bg-input: #ffffff;         /* input fields */
 
   /* Structure */
@@ -69,8 +69,9 @@
    BODY
 
    Max-width caps the reading width. Overly wide lines of text
-   are hard to read; 900px works well for a tool with a mix of
-   text and grid content.
+   are hard to read; 1040px leaves room for all eight tabs on a
+   single line while keeping the mix of text and grid content
+   readable.
    ============================================================ */
 body {
   font-family: var(--font-body);
@@ -149,7 +150,9 @@ code {
 
    Horizontal row of tab buttons. The active one has a KU Blue
    underline; inactive ones are muted. Uses flexbox with
-   flex-wrap so tabs wrap onto a second line on narrow screens.
+   flex-wrap so tabs wrap onto a second line when the window
+   is narrower than the tab row. On phones (≤640px) the media
+   query below switches to a single scrolling row instead.
    ============================================================ */
 nav.tabs {
   display: flex;
@@ -237,7 +240,8 @@ h2 {
 
 
 /* ============================================================
-   MODE TOGGLE (Raw data / Summary stats)
+   MODE TOGGLE (Raw data / Summary stats; Population / Sample
+   on the Cohen's d tab)
 
    Segmented control. Active mode is KU Blue background with
    white text; inactive is muted.
@@ -476,9 +480,10 @@ textarea::placeholder {
 /* ============================================================
    RESET BUTTON
 
-   Secondary action. outlined rather than filled 
-   padding is 11px becasue the 1px border adds the missing pixle, 
-   matching Calculate's 12px
+   Secondary action, outlined rather than filled. Vertical
+   padding is 11px because the 1px border adds the missing pixel,
+   matching Calculate's 12px. .btn-row places Calculate and Reset
+   side by side.
    ============================================================ */
 .btn-row {
   display: flex;
@@ -651,7 +656,9 @@ textarea::placeholder {
 .result-value.significant {
   color: #003459;
   font-weight: 500;
-  /* ^ Significant results are KU Blue and bolder. */
+  /* ^ Intentionally identical to .result-value. Significant results
+     are not highlighted so students interpret the output on their
+     own. */
 }
 
 /* ============================================================

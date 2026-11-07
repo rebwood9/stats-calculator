@@ -94,9 +94,10 @@ function wireTailToggle(toggleId) {
   toggle.addEventListener('click', function(event) {
     const btn = event.target.closest('button');
     if (!btn) return;
-    toggle.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  });
+    toggle.querySelectorAll("button").forEach((b) => {
+      const section = document.getElementById(prefix + "-" + b.dataset.mode);
+      section.style.display = b === btn ? "block" : "none";
+    });
 }
 
 /* Read the currently selected tail ('two', 'upper', or 'lower')
@@ -107,7 +108,7 @@ function getTail(toggleId) {
 }
 
 // Wire all tail toggles (z-test and the three t-tests).
-['z-tail', 't1-tail', 'tp-tail', 'ti-tail'].forEach(wireTailToggle);
+['z-tail', 'cd-tail', 't1-tail', 'tp-tail', 'ti-tail'].forEach(wireTailToggle);
 
 /* ============================================================
    SECTION 3b: MODE TOGGLES (Raw vs Summary)
@@ -380,9 +381,26 @@ document.getElementById('z-calc').addEventListener('click', function() {
   renderResults('z', cells);
 });
 
+/* ============================================================
+   SECTION 4d: Cohen's d
+   ============================================================ */
+document.getElementById("cd-calc").addEventListener("click", function () {
+  clearOutputs("cd");
+  const mode = getMode("cd"); // "pop" or "sample"
+
+  const m = parseFloat(document.getElementById(`cd-mean-${mode}`).value);
+  const mu = parseFloat(document.getElementById(`cd-mu-${mode}`).value);
+  const sd = parseFloat(document.getElementById(`cd-sd-${mode}`).value);
+
+  if (isNaN(m)) return showError("cd", "Enter the sample mean.");
+  if (isNaN(mu)) return showError("cd", "Enter the population mean (μ).");
+  if (isNaN(sd) || sd <= 0) return showError("cd", "Enter a positive SD.");
+
+  renderResults("cd", [["Cohen's d", formatNum(cohensD(m, mu, sd))]]);
+});
 
 /* ============================================================
-   SECTION 4d: ONE-SAMPLE T-TEST
+   SECTION 4e: ONE-SAMPLE T-TEST
    ============================================================ */
 
 document.getElementById('t1-calc').addEventListener('click', function() {
@@ -445,7 +463,7 @@ document.getElementById('t1-calc').addEventListener('click', function() {
 
 
 /* ============================================================
-   SECTION 4e: PAIRED-SAMPLE T-TEST
+   SECTION 4f: PAIRED-SAMPLE T-TEST
    ============================================================ */
 
 document.getElementById('tp-calc').addEventListener('click', function() {
@@ -515,7 +533,7 @@ document.getElementById('tp-calc').addEventListener('click', function() {
 
 
 /* ============================================================
-   SECTION 4f: INDEPENDENT-SAMPLE T-TEST (POOLED)
+   SECTION 4g: INDEPENDENT-SAMPLE T-TEST (POOLED)
    ============================================================ */
 
 document.getElementById('ti-calc').addEventListener('click', function() {
@@ -586,7 +604,7 @@ document.getElementById('ti-calc').addEventListener('click', function() {
 
 
 /* ============================================================
-   SECTION 4g: ONE-WAY BETWEEN-GROUPS ANOVA
+   SECTION 4h: ONE-WAY BETWEEN-GROUPS ANOVA
 
    This one is more involved because we support a dynamic number
    of groups. First we wire up the add/remove buttons, then the

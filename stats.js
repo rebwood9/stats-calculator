@@ -153,25 +153,21 @@ function zCriticalOneTailed(confidence) {
 }
 
 /* Given a t statistic, df, tail, and confidence, return the tail-aware
-   p-value and the critical t. tCritMag is the positive magnitude (used
-   for CI margins); tCritSigned is what to display (negative for a
-   lower-tailed test). */
+   p-value and the critical t to display (negative for a lower-tailed
+   test). The CI does not use this value; CIs are always two-tailed. */
 function tTestPandCrit(t, df, tail, confidence) {
-  let p, tCritMag, tCritSigned;
-  if (tail === 'upper') {
+  let p, tCrit;
+  if (tail === "upper") {
     p = tPvalueUpper(t, df);
-    tCritMag = tCriticalOneTailed(df, confidence);
-    tCritSigned = tCritMag;
-  } else if (tail === 'lower') {
+    tCrit = tCriticalOneTailed(df, confidence);
+  } else if (tail === "lower") {
     p = tPvalueLower(t, df);
-    tCritMag = tCriticalOneTailed(df, confidence);
-    tCritSigned = -tCritMag;
+    tCrit = -tCriticalOneTailed(df, confidence);
   } else {
     p = tPvalueTwoTailed(t, df);
-    tCritMag = tCritical(df, confidence);
-    tCritSigned = tCritMag;
+    tCrit = tCritical(df, confidence);
   }
-  return { p, tCritMag, tCritSigned };
+  return { p, tCrit };
 }
 
 /* ============================================================
@@ -304,23 +300,20 @@ function zTestFromSummary(xbar, mu0, sigma, n, confidence, tail) {
   const se = sigma / Math.sqrt(n);
   const z = (xbar - mu0) / se;
 
-  // Tail-aware p-value and the matching critical z.
-  let p, zcrit;
-  if (tail === 'upper') {
+  // Tail-aware p-value.
+  let p;
+  if (tail === "upper") {
     p = zPvalueUpper(z);
-    zcrit = zCriticalOneTailed(confidence);
-  } else if (tail === 'lower') {
+  } else if (tail === "lower") {
     p = zPvalueLower(z);
-    zcrit = zCriticalOneTailed(confidence);
   } else {
     p = zPvalueTwoTailed(z);
-    zcrit = zCritical(confidence);
   }
 
-  // CI uses the tail-matched critical value (both bounds finite,
-  // matching the textbook convention for one-sided tests).
-  const ciLower = xbar - zcrit * se;
-  const ciUpper = xbar + zcrit * se;
+  // CI is always two-tailed, regardless of the test's tail.
+  const zCI = zCritical(confidence);
+  const ciLower = xbar - zCI * se;
+  const ciUpper = xbar + zCI * se;
 
   const cohenD = (xbar - mu0) / sigma;
 
@@ -365,11 +358,12 @@ function oneSampleTTestFromSummary(xbar, s, n, mu0, confidence, tail) {
   const t = (xbar - mu0) / se;
 
   // Tail-aware p-value and the critical t to display.
-  const { p, tCritMag, tCritSigned } = tTestPandCrit(t, df, tail, confidence);
+  const { p, tCritSigned } = tTestPandCrit(t, df, tail, confidence);
 
-  // CI uses the tail-matched critical value.
-  const ciLower = xbar - tCritMag * se;
-  const ciUpper = xbar + tCritMag * se;
+  // CI is always two-tailed, regardless of the test's tail.
+  const tCI = tCritical(df, confidence);
+  const ciLower = xbar - tCI * se;
+  const ciUpper = xbar + tCI * se;
 
   // Cohen's d = (xbar - mu0) / s
   const cohenD = (xbar - mu0) / s;
@@ -412,11 +406,12 @@ function pairedTTestFromSummary(meanD, sdD, n, muD0, confidence, tail) {
   const t = (meanD - muD0) / se;
   
   // Tail-aware p-value and the critical t to display.
-  const { p, tCritMag, tCritSigned } = tTestPandCrit(t, df, tail, confidence);
+  const { p, tCritSigned } = tTestPandCrit(t, df, tail, confidence);
 
-  // CI uses the tail-matched critical value.
-  const ciLower = meanD - tCritMag * se;
-  const ciUpper = meanD + tCritMag * se;
+  // CI is always two-tailed, regardless of the test's tail.
+  const tCI = tCritical(df, confidence);
+  const ciLower = meanD - tCI * se;
+  const ciUpper = meanD + tCI * se;
 
   // Cohen's d = mean_D / SD_D  (labeled simply "Cohen's d" in the UI)
   const cohenD = meanD / sdD;
@@ -472,10 +467,11 @@ function independentTTestFromSummary(
   const t = meanDiff / se;
   
   // Tail-aware p-value and the critical t to display.
-  const { p, tCritMag, tCritSigned } = tTestPandCrit(t, df, tail, confidence);
+  const { p, tCritSigned } = tTestPandCrit(t, df, tail, confidence);
 
-  const ciLower = meanDiff - tCritMag * se;
-  const ciUpper = meanDiff + tCritMag * se;
+  // CI is always two-tailed, regardless of the test's tial. 
+  const ciLower = meanDiff - tCI * se;
+  const ciUpper = meanDiff + tCI * se;
 
   // Cohen's d using pooled SD
   const cohenD = meanDiff / sp;

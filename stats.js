@@ -319,7 +319,6 @@ function zTestFromSummary(xbar, mu0, sigma, n, confidence, tail) {
 
   return {
     xbar, mu0, sigma, n, se, z, p,
-    zCrit: zcrit,
     tail,
     ciLower, ciUpper,
     cohenD,
@@ -358,7 +357,7 @@ function oneSampleTTestFromSummary(xbar, s, n, mu0, confidence, tail) {
   const t = (xbar - mu0) / se;
 
   // Tail-aware p-value and the critical t to display.
-  const { p, tCritSigned } = tTestPandCrit(t, df, tail, confidence);
+  const { p, tCrit } = tTestPandCrit(t, df, tail, confidence);
 
   // CI is always two-tailed, regardless of the test's tail.
   const tCI = tCritical(df, confidence);
@@ -370,7 +369,7 @@ function oneSampleTTestFromSummary(xbar, s, n, mu0, confidence, tail) {
 
   return {
     xbar, s, n, se, df, t, p,
-    tCrit: tCritSigned,
+    tCrit,
     tail,
     ciLower, ciUpper,
     cohenD,
@@ -406,7 +405,7 @@ function pairedTTestFromSummary(meanD, sdD, n, muD0, confidence, tail) {
   const t = (meanD - muD0) / se;
   
   // Tail-aware p-value and the critical t to display.
-  const { p, tCritSigned } = tTestPandCrit(t, df, tail, confidence);
+  const { p, tCrit } = tTestPandCrit(t, df, tail, confidence);
 
   // CI is always two-tailed, regardless of the test's tail.
   const tCI = tCritical(df, confidence);
@@ -418,7 +417,7 @@ function pairedTTestFromSummary(meanD, sdD, n, muD0, confidence, tail) {
 
   return {
     meanD, sdD, n, se, df, t, p,
-    tCrit: tCritSigned,
+    tCrit,
     tail,
     ciLower, ciUpper,
     cohenD,
@@ -467,9 +466,10 @@ function independentTTestFromSummary(
   const t = meanDiff / se;
   
   // Tail-aware p-value and the critical t to display.
-  const { p, tCritSigned } = tTestPandCrit(t, df, tail, confidence);
+  const { p, tCrit } = tTestPandCrit(t, df, tail, confidence);
 
   // CI is always two-tailed, regardless of the test's tial. 
+  const tCI = tCritical(df, confidence);
   const ciLower = meanDiff - tCI * se;
   const ciUpper = meanDiff + tCI * se;
 
@@ -480,7 +480,7 @@ function independentTTestFromSummary(
     xbar1, s1, n1,
     xbar2, s2, n2,
     meanDiff, sp, se, df, t, p,
-    tCrit: tCritSigned,
+    tCrit,
     tail,
     ciLower, ciUpper,
     cohenD,
